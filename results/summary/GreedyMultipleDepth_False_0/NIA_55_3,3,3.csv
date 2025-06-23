@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+55,Thorncliffe Park,3,3,3,93.701479279996,194.87286311840927,"[215.0544554983689, 307.2237193027275, 531.3891557228991, 555.1158500774926, 754.090886413245, 931.2328764793978, 977.0832108249562, 1003.7007204971876, 1036.3591416588172, 1270.1175624558489]",194.804401161626,0.7689714431762695,39,98,7,12,2,

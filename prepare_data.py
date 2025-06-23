@@ -1,10 +1,12 @@
 from graph_utils import *
 from map_utils import *
-import matplotlib.pyplot as plt
+
 from pathlib import Path
 import argparse
 import networkx as nx
 import geopandas as gpd
+import matplotlib.pyplot as plt
+
 
 # def of tags: https://wiki.openstreetmap.org/wiki/Map_features#Others
 #POI['geometry'] some are points, some are polygon
@@ -22,27 +24,34 @@ def pednet_preprocessing():
     return
 
 def nia_preprocessing(nia_id):
+    
     '''
     Data needed for each NIA instance
     '''
     print("processing nia", nia_id)
     tag_parking={"amenity":"parking"}
     tag_residential={"building":["apartments","bungalow","cabin","detached","dormitory","farm","ger","hotel","house","houseboat","residential","semidetached_house","static_caravan","terrace"]}
-    tag_grocery={"shop":"supermarket"}
     tag_school={"amenity":"school"}
-    tag_mall={"shop":"mall"}
-    tag_coffee={"shop":"coffee"}
     tag_restaurant={"amenity":"restaurant"}
-
+    
+    tag_grocery= {"shop":["supermarket", "convenience"]}
+    tag_department_store = {
+    "shop": ["mall", "department_store"],
+    "amenity": "marketplace",
+    "landuse": "retail"}
+    tag_cafe= {"amenity":"cafe", "cuisine":"coffee_shop"}
     pednet = load_pednet(data_root)
+
 
     #D_NIA = ct_nia_mapping(os.path.join(data_root,"neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     prec=2
     pednet_nia = pednet_NIA(pednet,nia_id,preprocessing_folder)
+    print(f"Input data (pednet_nia): {pednet_nia}")
 
     # networkx graph
     G_raw = create_graph(pednet_nia, precision=prec)
+    
     subgraphs = list(G_raw.subgraph(c) for c in nx.connected_components(G_raw))
     # get the largest connect component
     sugbraph_index = [len(g.nodes) for g in subgraphs].index(max([len(g.nodes) for g in subgraphs]))
@@ -55,21 +64,21 @@ def nia_preprocessing(nia_id):
 
     # pandana net
     net_filename="NIA_%s_prec_%s.hd5" % (nia_id, prec)
-    transit_ped_net = get_pandana_net(G)
+    transit_ped_net = get_pandana_net(G,graph_save_path)
     transit_ped_net.save_hdf5(os.path.join(net_save_path, net_filename))
 
 
     residentials_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_residential)
-    malls_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_mall)
+    department_store_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_department_store)
     parking_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_parking)
     grocery_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_grocery)
     school_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_school)
-    coffee_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_coffee)
-    restaruant_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_restaurant)
+    cafe_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_cafe)
+    restaurant_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_restaurant)
 
 
-    all_dfs=[residentials_df, malls_df, parking_df, grocery_df, school_df, coffee_df, restaruant_df]
-    all_strs = ['residential', 'mall', 'parking', 'grocery', 'school', 'coffee','restaruant']
+    all_dfs=[residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df]
+    all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe','restaurant']
     colors = ['g','lightcoral','grey','red','yellow','brown','orange']
 
     ax = pednet_nia.plot(figsize=(15, 15), color='blue', markersize=1)
@@ -107,11 +116,13 @@ if __name__ == "__main__":
     if args.cc == 1:
         data_root = "/home/huangw98/projects/def-khalile2/huangw98/walkability_data"
     else:
-        data_root = "/Users/weimin/Documents/MASC/walkability_data"
+        data_root = "C:\\Users\\annve\\Downloads\\AAAI23-WalkabilityOptimization"
+    
 
     preprocessing_folder = "./preprocessing"
     Path(preprocessing_folder).mkdir(parents=True, exist_ok=True)
     net_save_path = os.path.join(preprocessing_folder, 'saved_nets')
+    graph_save_path = os.path.join(preprocessing_folder, 'networx_graph')
     df_save_path = os.path.join(preprocessing_folder, 'saved_dfs')
     sp_save_path = os.path.join(preprocessing_folder, 'saved_SPs')
     data_visual_save_path = os.path.join(preprocessing_folder, 'saved_visual')

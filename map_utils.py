@@ -10,14 +10,14 @@ from shapely.geometry import Polygon, LineString, Point, box
 from sqlalchemy import *
 from shapely.geometry import *
 import os
-import matplotlib.pyplot as plt
+
 
 
 def get_nias(data_root):
-    file_path = os.path.join(data_root,"neighbourhood-improvement-areas-wgs84/NEIGHBOURHOOD_IMPROVEMENT_AREA_WGS84.shp")
+    file_path = os.path.join(data_root,"Neighbourhood Improvement Areas - 4326", "Neighbourhood Improvement Areas - 4326.shp")
     nia = gpd.read_file(file_path)
     nia.columns = map(str.lower, nia.columns)
-    nia = nia[['area_id', 'area_s_cd', 'area_name', 'geometry']]
+    nia = nia[['area_id2', 'area_sh11', 'area_na13', 'geometry']]
     print("nias file crs is: " + str(nia.crs))
     crs = {'init': 'epsg:4326'}
     nia = gpd.GeoDataFrame(nia, crs=crs, geometry='geometry')
@@ -48,7 +48,7 @@ def get_CTs_boundary(CTs, use, file_path="data/lct_000b16a_e/lct_000b16a_e.shp")
     return boundary
 
 def get_NIAs_boundary(nia, use, data_root):
-    boundary = gpd.read_file(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/NEIGHBOURHOOD_IMPROVEMENT_AREA_WGS84.shp"))
+    boundary = gpd.read_file(os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "Neighbourhood Improvement Areas - 4326.shp"))
 
     print("CT file crs is: "+ str(boundary.crs))
     crs = {'init': 'epsg:4326'}
@@ -63,9 +63,9 @@ def get_NIAs_boundary(nia, use, data_root):
         return
 
     boundary.columns = map(str.lower, boundary.columns)
-    boundary["area_s_cd"] = boundary["area_s_cd"].apply(lambda x: int(x))
+    boundary["area_sh11"] = boundary["area_sh11"].apply(lambda x: int(x))
 
-    boundary = boundary[boundary["area_s_cd"] == nia]
+    boundary = boundary[boundary["area_sh11"] == nia]
 
     return boundary
 
@@ -73,7 +73,7 @@ def query_ox(polygons,tags):
     # might want to sava this to disk
     frames=[]
     for polygon in polygons:
-        frames.append(ox.geometries.geometries_from_polygon(polygon, tags))  #['unique_id', 'osmid', 'element_type', 'building', 'geometry']
+        frames.append(ox.features.features_from_polygon(polygon, tags))  #['unique_id', 'osmid', 'element_type', 'building', 'geometry']
     result = pd.concat(frames,ignore_index=True)
 
     return result.to_crs({'init': 'epsg:2019'})
@@ -109,6 +109,10 @@ def road_points(root,outputfile="./preprocessing/road_end_points.txt",prec=2):
     # pednet_path="zip://data/pednet.zip"
     pednet_path = os.path.join(root,"pednet.zip")
 
+    print("Checking pednet path:", pednet_path)
+    print("File exists?", os.path.exists(pednet_path))
+
+
     # reading pednet file
     pednet = gpd.read_file(pednet_path)
     print(pednet.crs)
@@ -138,9 +142,11 @@ def road_points(root,outputfile="./preprocessing/road_end_points.txt",prec=2):
 
 def road_nia_mapping(data_root, preprocessing_folder, outputfile):
     # code reference: https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb
-    nia = gpd.read_file(os.path.join(data_root,"neighbourhood-improvement-areas-wgs84/NEIGHBOURHOOD_IMPROVEMENT_AREA_WGS84.shp"))
+    nia = gpd.read_file(os.path.join(data_root,"Neighbourhood Improvement Areas - 4326.zip"))
+    print("Available columns in nia:", list(nia.columns))
     nia.columns = map(str.lower, nia.columns)
-    nia = nia[['area_id', 'area_s_cd', 'area_name', 'geometry']]
+    nia = nia[['area_id2', 'area_sh11', 'area_na13', 'geometry']]
+    #'area_id2', 'area_s_cd', 'area_na13', 'geometry'
 
     # reprojecting epsg 4386 (wgs84) to epsg 2019 (mtm nad 27)
     crs = {'init': 'epsg:4326'}
@@ -158,7 +164,7 @@ def road_nia_mapping(data_root, preprocessing_folder, outputfile):
 
     # assign road segments (end points) to census tract
     for row in range(len(nia)):
-        nia_id = int(nia.iloc[row]["area_s_cd"]) # nia name
+        nia_id = int(nia.iloc[row]["area_sh11"]) # nia name
         poly = nia.iloc[row]['geometry']  # nia_boundary
 
         for j in range(len(x_list)):
@@ -217,6 +223,7 @@ def ct_nia_mapping(nia_path):
     df = pd.read_excel(nia_path)
     D={}
     for i in range(len(df)):
+        print(df.iloc[:, 0])
         id = int(df.iloc[i][0])
         ct = str(df.iloc[i][2])
         if not id in D.keys():
@@ -258,7 +265,7 @@ def map_back_assign(assignments, df_from, df_to, dict):
 if __name__ == "__main__":
     #D=ct_nia_mapping()
     #b=1
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
+    data_root = "C:\\Users\\ASUS\\AAAI23-WalkabilityOptimization"
 
 
 

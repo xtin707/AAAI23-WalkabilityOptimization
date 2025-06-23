@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+25,Glenfield-Jane Heights,3,3,3,78.43379980605661,432.62372156497685,"[505.47566343223326, 741.6253363554736, 840.0400042432992, 930.8430513888379, 1017.6855293309856, 1168.335865554211, 1348.0070972029275, 1532.14497185975, 1673.1920730877243, 1830.3706892636576]",379.0224813406787,4.997640132904053,408,71,15,10,11,

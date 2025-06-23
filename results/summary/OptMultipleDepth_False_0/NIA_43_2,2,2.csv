@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+43,Victoria Village,2,2,2,63.94491051506269,493.42380168372557,"[588.4017710222132, 764.2524868850164, 1365.6682297297152, 1411.1306465069492, 2235.1205954721445, 2183.586576185544, 2184.4935606038985, 2206.103057942986, 0, 0]",478.68973380600636,20446.325000047684,246,83,5,6,4,9

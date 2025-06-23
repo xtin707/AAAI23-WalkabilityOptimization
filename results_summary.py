@@ -7,9 +7,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 import geopandas as gpd
+import matplotlib.ticker as ticker 
+from matplotlib.ticker import MultipleLocator
 from model_latest import opt_single, cur_assignment_single, opt_multiple, opt_single_depth, cur_assignment_single_depth, weights_array, dist_to_score, L_a, L_f_a, weights_array_multi, choice_weights
 
+def ensure_directory_exists(folder_path): 
+    """Ensure that a directory exists. If a file path is given, create its parent directory."""
+    if not folder_path:
+        return  # Prevent errors if an empty path is given
 
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)
+
+    
 def shifted_geo_mean(L, s=1):
     a = np.array(L)
     shifted = a+s
@@ -31,9 +41,9 @@ def get_results_df(results_folder, model_name,amenity_name=None):
 
 def plot_time_vs_size_multiple(results_folder, plot_folder, models, display_names, save_name):
 
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
+    data_root =  r"C:\Users\annve\Downloads\AAAI23-WalkabilityOptimization"
     D_NIA = ct_nia_mapping(
-        os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+        os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
     plt.clf()
 
 
@@ -58,7 +68,11 @@ def plot_time_vs_size_multiple(results_folder, plot_folder, models, display_name
     plt.xlabel("|M|+|N|")
     plt.ylabel("Shifted geo mean")
     plt.title(save_name)
-    plt.savefig(os.path.join(plot_folder,  save_name))
+    
+    # Ensure the directory exists before saving the plot (F1)
+    save_path = os.path.join(plot_folder, save_name)
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path)
     return
 
 def plot_time_vs_size_single(results_folder, plot_folder, models, display_names, save_name):
@@ -88,14 +102,20 @@ def plot_time_vs_size_single(results_folder, plot_folder, models, display_names,
     plt.xlabel("|M|+|N|")
     plt.ylabel("Shifted geo mean")
     plt.title(save_name)
-    plt.savefig(os.path.join(plot_folder,  save_name))
+    
+    # Ensure the directory exists before saving the plot (F2)
+    save_path = os.path.join(plot_folder, save_name)
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path)
+    
+
     return
 
 
 def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_name):
 
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
+    D_NIA = ct_nia_mapping(os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     if 'Depth' in model_name:
         for ind in [0,1]:
@@ -112,7 +132,13 @@ def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_nam
                 plt.legend(prop={'size': 6})
                 plt.xlabel("k")
                 plt.ylabel("dist (m)")
-            plt.savefig(os.path.join(plot_folder, amenity_name + "_" + display_name + ("_k_vs_dist_%s.png" % (ind+1))))
+            # Ensure the directory exists before saving the plot (F3)
+            save_path = os.path.join(plot_folder, f"{amenity_name}_{display_name}_k_vs_dist_{ind+1}.png")
+            ensure_directory_exists(os.path.dirname(save_path))
+            plt.savefig(save_path)
+            
+
+
 
     else:
         plt.clf()
@@ -127,7 +153,10 @@ def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_nam
             plt.legend(prop={'size': 6})
             plt.xlabel("k")
             plt.ylabel("dist (m)")
-        plt.savefig(os.path.join(plot_folder,  amenity_name + "_"+ display_name + "_k_vs_dist.png"))
+        # Ensure the directory exists before saving the plot (F4)
+        save_path = os.path.join(plot_folder, f"{amenity_name}_{display_name}_k_vs_dist.png")
+        ensure_directory_exists(os.path.dirname(save_path))
+        plt.savefig(save_path)
 
     plt.clf()
     plt.figure(figsize=(15, 10))
@@ -146,14 +175,17 @@ def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_nam
         plt.legend(prop={'size': 6})
         plt.xlabel("k")
         plt.ylabel("score")
-    plt.savefig(os.path.join(plot_folder, amenity_name + "_"+ display_name + "_k_vs_score.png"))
+    # Ensure the directory exists before saving the plot (F5)
+    save_path = os.path.join(plot_folder, f"{amenity_name}_{display_name}_k_vs_score.png")
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path)
 
     return
 
 
 def all_instances_obj(data_root, results_folder,processed_folder):
     INCLUDE_BP=False
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     # opt single
     print("single case")
@@ -343,8 +375,15 @@ def all_instances_obj(data_root, results_folder,processed_folder):
 
             # Greedy
             if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k))):
-                greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)),index_col=None, header=0)
-                L_greedy_obj.append(greedy_df["obj"].values[0])
+                #greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)),index_col=None, header=0)
+                file_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0",
+                         "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k))
+                if os.path.exists(file_path):
+                    greedy_df = pd.read_csv(file_path, index_col=None, header=0)
+                    L_greedy_obj.append(greedy_df["obj"].values[0])
+                else:
+                    print(f"Skipping NIA {nia} with k={k} — file not found.")
+                               
             else:
                 L_greedy_obj.append(None)
 
@@ -486,7 +525,7 @@ def all_instances_obj(data_root, results_folder,processed_folder):
 def single_aggregate_obj(data_root, results_folder,processed_folder):
 
     # NOTE: THIS IS A RELATXATION, AS IT ALLOWS COMPETING RESOURCES TO BE TOGETHER AND DISREGARDS THE CAPACITY CONSTRAINTS
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     # no depth
     print("single aggregate, no depth")
@@ -553,8 +592,8 @@ def single_aggregate_obj(data_root, results_folder,processed_folder):
 
 def plot_quality(processed_folder):
 
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
     plt.clf()
 
     # single case
@@ -587,7 +626,11 @@ def plot_quality(processed_folder):
         plt.xlabel("|M|+|N|")
         plt.ylabel("Relative error")
         plt.title("solution quality - single amenity case")
-        plt.savefig(os.path.join(plot_folder, "quality", "single"))
+        # Ensure the directory exists before saving the plot
+        save_path = os.path.join(plot_folder, "quality", "single", "single_plot.png")
+        ensure_directory_exists(os.path.dirname(save_path))
+        plt.savefig(save_path)
+
 
     plt.clf()
 
@@ -619,7 +662,12 @@ def plot_quality(processed_folder):
         plt.xlabel("|M|+|N|")
         plt.ylabel("Relative error")
         plt.title("solution quality - single amenity with depth of choice")
-        plt.savefig(os.path.join(plot_folder, "quality", "single_depth"))
+        
+        # Ensure the directory exists before saving the plot
+        save_path = os.path.join(plot_folder, "quality", "single_depth", "single_depth_plot.png")
+        ensure_directory_exists(os.path.dirname(save_path))
+        plt.savefig(save_path)
+
 
 
     # multiple amenity case
@@ -652,7 +700,12 @@ def plot_quality(processed_folder):
     plt.xlabel("|M|+|N|")
     plt.ylabel("Relative error")
     plt.title("solution quality - multiple amenity case")
-    plt.savefig(os.path.join(plot_folder, "quality", "multiple"))
+    
+    # Ensure the directory exists before saving the plot
+    save_path = os.path.join(plot_folder, "quality", "multiple", "multiple_plot.png")
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path)
+
 
     # multiple amenity case with depth of choice
     plt.clf()
@@ -683,15 +736,18 @@ def plot_quality(processed_folder):
     plt.xlabel("|M|+|N|")
     plt.ylabel("Relative error")
     plt.title("solution quality - multiple amenity with depth of choice")
-    plt.savefig(os.path.join(plot_folder, "quality", "multiple_depth"))
-
+    
+    # Ensure the directory exists before saving the plot
+    save_path = os.path.join(plot_folder, "quality", "multiple_depth", "multiple_depth_plot.png")
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path)
     return
 
 
 def network_charac(data_root, results_folder,processed_folder):
 
 
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     L_nia = []
 
@@ -785,9 +841,9 @@ def plot_time_by_group_multiple(results_folder, plot_folder, models, display_nam
 
     all_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
+    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
     D_NIA = ct_nia_mapping(
-        os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+         os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
     plt.clf()
 
     group_thres = [0,200,400,600,1115]
@@ -867,7 +923,10 @@ def plot_time_by_group_multiple(results_folder, plot_folder, models, display_nam
     #plt.setp(plt.gca(),ylim=(-5,))
 
     #plt.title(save_name)
-    plt.savefig(os.path.join(plot_folder,  save_name+".pdf"),bbox_inches='tight')
+    # Ensure the directory exists before saving the plot
+    save_path = os.path.join(plot_folder,  save_name + ".pdf")
+    ensure_directory_exists(os.path.dirname(save_path))
+    plt.savefig(save_path, bbox_inches='tight')
     return
 
 
@@ -1204,11 +1263,24 @@ def quality_table(results_folder, processed_folder):
     return
 
 def hist_distances(data_root, results_folder,processed_folder,plot_folder):
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    SMALL_SIZE = 8
+    MEDIUM_SIZE = 13
+    BIGGER_SIZE = 16
+        # if L_all_type_names[ind]=="grocery":
+        #     BIGGER_SIZE = 25
+
+        # plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)  # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=MEDIUM_SIZE)  # fontsize of the tick labels
+    plt.rc('ytick', labelsize=MEDIUM_SIZE)  # fontsize of the tick labels
+    plt.rc('legend', fontsize=BIGGER_SIZE)  # legend fontsize
+        # plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+        
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     # opt multiple depth
     print("multiple depth case")
-
 
     dist_grocery_before = []
     dist_res_1_before = []
@@ -1221,7 +1293,8 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
     dist_school_after = {}
 
     #k = 4
-    all_k = [2,3]
+    # ORIG: all_k = [2,3]
+    all_k = [3]
     use = 'mip'
     for k in all_k:
         dist_grocery_after[k] = []
@@ -1243,9 +1316,8 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                     dist_res_1 = list(mip_df["0_dist_restaurant"])
                     dist_res_2 = list(mip_df["1_dist_restaurant"])
 
-                else:
-                    # if not feasible, use greedy solution
-                    if os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
+                elif os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
+                    # if not feasible, use greedy solution 
                         greedy_df = pd.read_csv(
                             os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename),
                             index_col=None, header=0)
@@ -1253,7 +1325,9 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                         dist_school = greedy_df["dist_school"]
                         dist_res_1 = list(greedy_df["0_dist_restaurant"])
                         dist_res_2 = list(greedy_df["1_dist_restaurant"])
-                    print("????????")
+                else: 
+                    print(f"File not found for NIA {nia}, skipping...")
+                    continue
 
                 dist_grocery_after[k] += list(dist_grocery)
                 dist_school_after[k] += list(dist_school)
@@ -1268,8 +1342,9 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                     choices_dist = [cp_df[str(c) + "_dist_restaurant"] if (str(c) + "_dist_restaurant") in mip_df.columns else L_a[-2] for c in range(10)]
                     dist_school = cp_df["dist_school"]
 
-                else:
-                    print("????????")
+                else: 
+                    print(f"File not found for NIA {nia}, skipping...")
+                    continue
 
                 dist_grocery_after[k] += list(dist_grocery)
                 dist_school_after[k] += list(dist_school)
@@ -1360,96 +1435,108 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
         plt.xlabel("Walking Time (Minutes)")
         #plt.ylabel("Frequency")
 
-        SMALL_SIZE = 8
-        MEDIUM_SIZE = 13
-        BIGGER_SIZE = 16
-        # if L_all_type_names[ind]=="grocery":
-        #     BIGGER_SIZE = 25
-
-        # plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
-        plt.rc('axes', titlesize=SMALL_SIZE)  # fontsize of the axes title
-        plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
-        plt.rc('xtick', labelsize=MEDIUM_SIZE)  # fontsize of the tick labels
-        plt.rc('ytick', labelsize=MEDIUM_SIZE)  # fontsize of the tick labels
-        plt.rc('legend', fontsize=BIGGER_SIZE)  # legend fontsize
-        # plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
-        plt.savefig(os.path.join(plot_folder,"final_eval", L_all_save_names[ind]),bbox_inches='tight')
-
-
+        # Ensure the directory exists before saving the plot
+        save_path = os.path.join(plot_folder,"final_eval", L_all_save_names[ind])
+        ensure_directory_exists(os.path.dirname(save_path))
+        plt.savefig(save_path, bbox_inches='tight')
     return
 
-def nia_avg_walking_time(data_root,plot_folder,results_folder,preprocessing_folder):
-    SIZE=7
+import os
+import pandas as pd
+import numpy as np
+import geopandas as gpd
+import matplotlib.pyplot as plt
+
+def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_folder):
+    SIZE = 7
     plt.figure(dpi=300)
 
-    '''plot code reference: https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb'''
+    '''Plot code reference: https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb'''
 
     nia_shape = get_nias(data_root)
 
-    # reading pednet file
-    # pednet_path = os.path.join(data_root, "pednet.zip")
-    # pednet = gpd.read_file(pednet_path)
+    # Ensure geometries are in a projected CRS before computing centroids
+    #if nia_shape.crs is None or nia_shape.crs.to_epsg() != 3857:
+    #    nia_shape = nia_shape.to_crs(epsg=3857)  # Convert to a projected CRS
 
-    nia_shape["center"] = nia_shape["geometry"].centroid
+    nia_shape["center"] = nia_shape["geometry"].centroid  # Now safe to compute centroids
     nia_points = nia_shape.copy()
     nia_points.set_geometry("center", inplace=True)
 
     speed = 1.2
-    dist_grocery=[]
-    dist_res1=[]
-    dist_res2=[]
-    dist_school=[]
-    walk_obj=[]
 
-    for nia in [int(item) for item in nia_shape["area_s_cd"]]:
+    dist_grocery = []
+    dist_res1 = []
+    dist_res2 = []
+    dist_school = []
+    walk_obj = []
 
-        #pednet_nia = pednet_NIA(pednet, nia, preprocessing_folder)
-
+    for nia in [int(item) for item in nia_shape["area_sh11"]]:
+        
         print("nia:", nia)
-        k=0
-        filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
-        if os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
-            greedy_df = pd.read_csv(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename),
-                                    index_col=None, header=0)
-            greedy_df_result = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)),
-                                    index_col=None, header=0)
-        else:
-            print("????????")
-        dist_grocery.append(np.mean(greedy_df["dist_grocery"]))
-        dist_res1.append(np.mean(greedy_df["0_dist_restaurant"]))
-        dist_res2.append(np.mean(greedy_df["1_dist_restaurant"]))
-        dist_school.append(np.mean(greedy_df["dist_school"]))
-        walk_obj.append(greedy_df_result["obj"])
+        k = 0
+        filename = f"assignment_NIA_{nia}_{k},{k},{k}.csv"
+        greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
+        summary_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", f"NIA_{nia}_{k},{k},{k}.csv")
 
-    nia_shape["dist_grocery"] = (np.array(dist_grocery)/speed)/60
-    nia_shape["dist_res1"] = (np.array(dist_res1)/speed)/60
-    nia_shape["dist_res2"] = (np.array(dist_res2)/speed)/60
-    nia_shape["dist_school"] = (np.array(dist_school)/speed)/60
+        if os.path.exists(greedy_path) and os.path.exists(summary_path):
+            greedy_df = pd.read_csv(greedy_path, index_col=None, header=0)
+            greedy_df_result = pd.read_csv(summary_path, index_col=None, header=0)
+        else:
+            print("???????? File not found:", greedy_path, "or", summary_path)
+            greedy_df = pd.DataFrame()  # Assign an empty DataFrame to avoid UnboundLocalError
+            greedy_df_result = pd.DataFrame()
+
+        # Check if the required columns exist before accessing them
+        if not greedy_df.empty and "dist_grocery" in greedy_df.columns:
+            dist_grocery.append(np.mean(greedy_df["dist_grocery"]))
+            dist_res1.append(np.mean(greedy_df["0_dist_restaurant"]))
+            dist_res2.append(np.mean(greedy_df["1_dist_restaurant"]))
+            dist_school.append(np.mean(greedy_df["dist_school"]))
+        else:
+            print(f"Warning: Missing required columns in {greedy_path}")
+            dist_grocery.append(np.nan)
+            dist_res1.append(np.nan)
+            dist_res2.append(np.nan)
+            dist_school.append(np.nan)
+
+        if not greedy_df_result.empty and "obj" in greedy_df_result.columns:
+            walk_obj.append(np.mean(greedy_df_result["obj"]))
+        else:
+            print(f"Warning: Missing 'obj' column in {summary_path}")
+            walk_obj.append(np.nan)
+
+    nia_shape["dist_grocery"] = (np.array(dist_grocery) / speed) / 60
+    nia_shape["dist_res1"] = (np.array(dist_res1) / speed) / 60
+    nia_shape["dist_res2"] = (np.array(dist_res2) / speed) / 60
+    nia_shape["dist_school"] = (np.array(dist_school) / speed) / 60
     nia_shape["walk_obj"] = np.array(walk_obj)
 
-    ax=nia_shape.plot(column='walk_obj',legend=True, legend_kwds={'shrink': 0.5}, cmap='OrRd')
+    ax = nia_shape.plot(column="walk_obj", legend=True, legend_kwds={"shrink": 0.5}, cmap="OrRd")
     texts = []
-    for x, y, label, id in zip(nia_points.geometry.x, nia_points.geometry.y, nia_points["area_name"],nia_points["area_s_cd"]):
-        # can instead plot id too?
-        texts.append(plt.text(x - 0.01, y+0.01, int(id), fontsize=SIZE,bbox=dict(boxstyle='square,pad=0.05', fc='white', ec='none')))
-        # names
-        #texts.append(plt.text(x-0.01, y, label[:-5], fontsize=7, bbox=dict(boxstyle='square,pad=0.1', fc='white', ec='none')))
-    #plt.show()
-    #ax.yaxis.set_ticks(np.arange(43.6, 43.8, 0.25))
-    plt.rc('font', size=SIZE)  # controls default text sizes
-    plt.rc('axes', titlesize=SIZE)  # fontsize of the axes title
-    plt.rc('axes', labelsize=SIZE)  # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=SIZE)  # fontsize of the tick labels
-    plt.rc('ytick', labelsize=SIZE)  # fontsize of the tick labels
-    plt.rc('legend', fontsize=SIZE)  # legend fontsize
+    for x, y, label, id in zip(nia_points.geometry.x, nia_points.geometry.y, nia_points["area_na13"], nia_points["area_sh11"]):
+        texts.append(plt.text(x - 0.01, y + 0.01, int(id), fontsize=SIZE, bbox=dict(boxstyle="square,pad=0.05", fc="white", ec="none")))
+
+    plt.rc("font", size=SIZE)
+    plt.rc("axes", titlesize=SIZE)
+    plt.rc("axes", labelsize=SIZE)
+    plt.rc("xtick", labelsize=SIZE)
+    plt.rc("ytick", labelsize=SIZE)
+    plt.rc("legend", fontsize=SIZE)
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder,"final_eval", "cur_score.pdf"))
-    plt.savefig(os.path.join(plot_folder, "final_eval", "cur_score.png"))
+
+    # Ensure the directory exists before saving the plot
+    save_dir = os.path.join(plot_folder, "final_eval")
+    ensure_directory_exists(save_dir) 
+
+    plt.savefig(os.path.join(save_dir, "cur_score.pdf"))
+    plt.savefig(os.path.join(save_dir, "cur_score.png"))
+
     return
 
 
 def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_folder):
+    
     SIZE=7
     plt.figure(dpi=300)
 
@@ -1460,7 +1547,7 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
     # reading pednet file
     # pednet_path = os.path.join(data_root, "pednet.zip")
     # pednet = gpd.read_file(pednet_path)
-
+    #nia_shape["geometry"] = nia_shape["geometry"].to_crs(epsg=3857)  # NEW ADDED Replace EPSG code with your target projected CRS
     nia_shape["center"] = nia_shape["geometry"].centroid
     nia_points = nia_shape.copy()
     nia_points.set_geometry("center", inplace=True)
@@ -1469,11 +1556,14 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
 
         walk_obj = []
 
-        for nia in [int(item) for item in nia_shape["area_s_cd"]]:
+        for nia in [int(item) for item in nia_shape["area_sh11"]]:
 
             ###############
             print("nia:", nia)
             filename = "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
+            
+            obj = np.nan  # ✅ Set a default value to prevent UnboundLocalError
+            
             #  MIP
             if os.path.exists(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename)):
                 mip_df = pd.read_csv(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
@@ -1486,14 +1576,41 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
 
             walk_obj.append(obj)
             ###############
+            
+            # ADDED Debug fixing inhomogenous shapes
+            cleaned_walk_obj = []
+            for w in walk_obj:
+                if isinstance(w, pd.Series):
+                    cleaned_walk_obj.append(w.iloc[0])  # extract the float value from the Series
+                else:
+                    cleaned_walk_obj.append(w)
 
-        nia_shape["walk_obj_"+str(k)] = np.array(walk_obj)
+        nia_shape["walk_obj_" + str(k)] = np.array(cleaned_walk_obj)
 
     nia_shape["delta"] = nia_shape["walk_obj_3"]-nia_shape["walk_obj_0"]
 
-    ax=nia_shape.plot(column='delta',legend=True, legend_kwds={'shrink': 0.5},cmap='BuPu')
+    # ALTERED ax=nia_shape.plot(column='delta',legend=True, legend_kwds={'shrink': 0.5},cmap='viridis', edgecolor='white',linewidth=0.5)
+    vmin, vmax = 10, 55
+    ax = nia_shape.plot(
+        column='delta',
+        cmap='viridis',
+        legend=True,
+        vmin=vmin,
+        vmax=vmax,
+        legend_kwds={'shrink': 0.5},
+        edgecolor='white',
+        linewidth=0.5
+    )
+    
+    # ALTERED cbar = ax.get_figure().get_axes()[1] cbar.yaxis.set_major_locator(ticker.MultipleLocator(10))
+    # Colorbar tick formatting
+    cbar = ax.get_figure().get_axes()[1]
+    cbar.yaxis.set_major_locator(ticker.MultipleLocator(10))
+    cbar.set_ylim(vmin, vmax)
+    
+    
     texts = []
-    for x, y, label, id in zip(nia_points.geometry.x, nia_points.geometry.y, nia_points["area_name"],nia_points["area_s_cd"]):
+    for x, y, label, id in zip(nia_points.geometry.x, nia_points.geometry.y, nia_points["area_na13"],nia_points["area_sh11"]):
         # can instead plot id too?
 
         texts.append(plt.text(x - 0.01, y+0.01, int(id), fontsize=SIZE, bbox=dict(boxstyle='square,pad=0.05', fc='white', ec='none')))
@@ -1508,8 +1625,13 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
     plt.rc('ytick', labelsize=SIZE)  # fontsize of the tick labels
     plt.rc('legend', fontsize=SIZE)  # legend fontsize
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder,"final_eval", "score_delta_k3.pdf"))
-    plt.savefig(os.path.join(plot_folder, "final_eval", "score_delta_k3.png"))
+    
+    # Ensure the directory exists before saving the plot
+    save_dir = os.path.join(plot_folder, "final_eval")
+    ensure_directory_exists(save_dir)  
+    plt.savefig(os.path.join(save_dir, "score_delta_k3.pdf"))
+    plt.savefig(os.path.join(save_dir, "score_delta_k3.png"))
+    
     return
 
 def avg_obj_vs_k_multi(results_folder, plot_folder):
@@ -1518,8 +1640,8 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     MEDIUM_SIZE = 13
     BIGGER_SIZE = 22
 
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
-    D_NIA = ct_nia_mapping(os.path.join(data_root, "neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
+    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
     # dist obj
     plt.clf()
@@ -1558,13 +1680,21 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
                 L_school_temp.append(df["dist_obj_L_school"])
                 L_obj_temp.append(df["obj"])
             elif (k>0) and (not os.path.exists(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename))):
-                df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0","NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)), index_col=None, header=0)
-                L_grocery_temp.append(df["dist_obj_L_grocery"])
-                L_res_0_temp.append([L[0] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
-                L_res_1_temp.append([L[1] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
-                L_res_1_temp.append([L[2] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
-                L_school_temp.append(df["dist_obj_L_school"])
-                L_obj_temp.append(df["obj"])
+                #df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0","NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)), index_col=None, header=0)
+                file_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0",
+                         "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k))
+
+                if os.path.exists(file_path):
+                    df = pd.read_csv(file_path, index_col=None, header=0)
+                    # your processing here
+                    L_grocery_temp.append(df["dist_obj_L_grocery"])
+                    L_res_0_temp.append([L[0] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
+                    L_res_1_temp.append([L[1] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
+                    L_res_1_temp.append([L[2] for L in [json.loads(x) for x in df["dist_obj_L_restaurant"]]])
+                    L_school_temp.append(df["dist_obj_L_school"])
+                    L_obj_temp.append(df["obj"])
+                else:
+                    print(f"Skipping missing file: {file_path}")
             else:
                 print("????????")
         L_grocery.append(np.mean(L_grocery_temp))
@@ -1591,6 +1721,7 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     ax2 = ax1.twinx()
     ax2.set_ylabel('Score', color='purple')
     ax2.set_ylim([50, 95])
+    ax2.yaxis.set_major_locator(MultipleLocator(10)) 
     ax2.plot(L_k, L_obj, color='purple', label="score",linestyle="dashdot",marker="^")
     ax2.tick_params(axis='y', labelcolor='purple')
 
@@ -1607,7 +1738,14 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     plt.rc('ytick', labelsize=BIGGER_SIZE)  # fontsize of the tick labels
     plt.rc('legend', fontsize=BIGGER_SIZE)  # legend fontsize
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, ("quality/avg_dist_vs_k_depth.pdf" )))
+    
+    # Ensure the directory exists before saving the plot
+    quality_folder = os.path.join(plot_folder, "quality")
+    ensure_directory_exists(quality_folder)
+    # plt.savefig(save_path, "quality/avg_dist_vs_k_depth.pdf")
+    save_path = os.path.join(plot_folder, "quality", "avg_dist_vs_k_depth.pdf")
+    plt.savefig(save_path)
+
 
     plt.clf()
     plt.figure(figsize=(8, 8))
@@ -1637,12 +1775,20 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
                 L_school_temp.append(df["dist_obj_L_school"])
                 L_obj_temp.append(df["obj"])
             elif (k > 0) and (not os.path.exists(os.path.join(results_folder, "summary", "OptMultiple_False_0", filename))):
-                df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)),index_col=None, header=0)
+                #df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)),index_col=None, header=0)
+                file_path = os.path.join(results_folder, "summary", "GreedyMultiple_False_0",
+                                        "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k))
 
-                L_grocery_temp.append(df["dist_obj_L_grocery"])
-                L_res_temp.append(df["dist_obj_L_restaurant"])
-                L_school_temp.append(df["dist_obj_L_school"])
-                L_obj_temp.append(df["obj"])
+                if os.path.exists(file_path):
+                    df = pd.read_csv(file_path, index_col=None, header=0)
+                    # your processing here
+                    L_grocery_temp.append(df["dist_obj_L_grocery"])
+                    L_res_temp.append(df["dist_obj_L_restaurant"])
+                    L_school_temp.append(df["dist_obj_L_school"])
+                    L_obj_temp.append(df["obj"])
+                else:
+                    print(f"Skipping missing file: {file_path}")
+                
         L_k.append(k)
         L_grocery.append(np.mean(L_grocery_temp))
         L_res.append(np.mean(L_res_temp))
@@ -1653,6 +1799,7 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     plt.rcParams.update({'font.size': BIGGER_SIZE})
     ax1.set_xlabel('k')
     ax1.set_ylabel('Distance (Meters)', color='black')
+    ax1.yaxis.set_major_locator(MultipleLocator(100)) 
     ax1.tick_params(axis='y', labelcolor='black')
 
     ax1.plot(L_k, L_grocery, label="Grocery",marker="^")
@@ -1662,6 +1809,7 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     ax2 = ax1.twinx()
     ax2.set_ylabel('score', color='purple')
     ax2.set_ylim([50, 95])
+    ax2.yaxis.set_major_locator(MultipleLocator(10)) 
     ax2.plot(L_k, L_obj, color='purple', label="score", linestyle="dashdot",marker="^")
     ax2.tick_params(axis='y', labelcolor='purple')
 
@@ -1676,7 +1824,15 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
     plt.rc('legend', fontsize=BIGGER_SIZE)  # legend fontsize
 
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, ("quality/avg_dist_vs_k_no_depth.pdf" )))
+    # Ensure the directory exists before saving the plot
+    save_dir = os.path.join(plot_folder, "quality") 
+    ensure_directory_exists(save_dir)  
+
+    plt.savefig(os.path.join(save_dir, "avg_dist_vs_k_no_depth.pdf"))  
+    
+    
+    
+
 
     # # score obj
     #
@@ -1705,76 +1861,15 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
 
 if __name__ == "__main__":
 
-    results_folder = "saved_results"
+    results_folder = "results"
     plot_folder = "results_plot"
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
+    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
     processed_folder= "processed_results"
     preprocessing_folder = "./preprocessing"
-    # for model_name in ["OptSingleCP_False_0"]:
-    #     if model_name in ["OptSingle_False_0","OptSingleCP_False_0"]:
-    #         amenity_L=["restaurant", "grocery", "school"]
-    #     elif model_name=="OptSingleDepth_False_0":
-    #         amenity_L = ["restaurant"]
-    #     for amenity in amenity_L:
-    #         results_df = get_results_df(results_folder, model_name, amenity)
-    #         plot_obj_vs_k(results_df, plot_folder,amenity,model_name, model_name.split("_")[0])
-
-
-    # plot solving time (shifted geometric mean)
-    # plot_time_vs_size_single(results_folder, os.path.join(plot_folder,"time"), ["OptSingle_False_0", "OptSingleCP_False_0","GreedySingle_False_0"],
-    #                          ["MILP",  "CP", "Greedy"],"Single amenity case without depth: shifted geo mean - input size")
-    # plot_time_vs_size_single(results_folder, os.path.join(plot_folder, "time"), ["OptSingleDepth_False_0", "OptSingleDepthCP_False_0","GreedySingleDepth_False_0"],
-    #                          ["MILP", "CP", "Greedy"], "Single amenity case with depth of choice: shifted geo mean - input size")
-    # plot_time_vs_size_multiple(results_folder, os.path.join(plot_folder,"time"),["OptMultiple_False_0","OptMultipleCP_False_0","GreedyMultiple_False_0"],
-    #                          ["MILP","CP", "Greedy"], "Multiple amenity case without depth: shifted geo mean - input size")
-    # plot_time_vs_size_multiple(results_folder, os.path.join(plot_folder, "time"), ["OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0","GreedyMultipleDepth_False_0"],
-    #                           ["MILP", "CP", "Greedy"], "Multiple amenity case with depth of choice: shifted geo mean - input size")
-
-    #all_instances_obj(data_root, results_folder, "processed_results")
-    # # plot quality
-    # plot_quality("processed_results")
-
-    # network_charac(data_root, results_folder, "processed_results")
-
-    # boxplots
-    ## with Branch priority
-    # plot_time_by_group_multiple(results_folder, os.path.join(plot_folder,"time"),["OptMultiple_False_0","OptMultipleCP_False_0","GreedyMultiple_False_0","OptMultiple_True_0"],
-    #                           ["MILP","CP", "Greedy","MILP-bp"], "boxplot multiple")
-    # plot_time_by_group_multiple(results_folder, os.path.join(plot_folder, "time"),
-    #                             ["OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0","GreedyMultipleDepth_False_0","OptMultipleDepthCP_True_0","OptMultipleDepth_True_0"],
-    #                             ["MILP", "CP", "Greedy","CP-bp","MILP-bp"], "boxplot multiple depth")
-    ## without branch priority
-    # plot_time_by_group_multiple(results_folder, os.path.join(plot_folder, "time"),
-    #                             ["OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0",
-    #                              "GreedyMultipleDepth_False_0"],
-    #                             ["MILP", "CP", "Greedy"], "boxplot multiple depth")
-    # plot_time_by_group_multiple(results_folder, os.path.join(plot_folder, "time"),
-    #                             ["OptMultiple_False_0", "OptMultipleCP_False_0", "GreedyMultiple_False_0"],
-    #                             ["MILP", "CP", "Greedy"], "boxplot multiple")
-
-
-    # plot_time_by_group_multiple(results_folder, os.path.join(plot_folder, "time"),
-    #                             ["OptMultiple_False_0", "OptMultipleCP_False_0", "GreedyMultipleLazy_False_0"],
-    #                             ["MILP", "CP", "Greedy"], "boxplot multiple lazy greedy")
-
-
-    # # temp quality measures
-    # quality_table_by_k_multiple(processed_folder)
-    # quality_table_by_group_multiple(processed_folder)
-    # opt_feas_multiple(results_folder, processed_folder)
-
-    # final quality table
-    # all_instances_obj(data_root, results_folder, "processed_results")
-    # quality_table(results_folder, processed_folder)
-
-    # Make histogram
-    # hist_distances(data_root, results_folder, processed_folder, plot_folder)
-
-    # draw nia
+    
     nia_avg_walking_time(data_root,plot_folder,results_folder,preprocessing_folder)
     nia_avg_walking_time_2(data_root, plot_folder, results_folder, preprocessing_folder)
+    hist_distances(data_root, results_folder,processed_folder,plot_folder)
+    avg_obj_vs_k_multi(results_folder, plot_folder)
+    #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
 
-    # avg_obj_vs_k_multi(results_folder, plot_folder)
-
-
-    # for summarizing extra data: for nia in list(D_NIA.keys()):+new list... (make summary, calcualte all ins obj, then do quality table).can data do boxplot

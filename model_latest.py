@@ -7,7 +7,6 @@ import numpy as np
 from docplex.cp.model import *
 import copy
 from map_utils import map_back_allocate, map_back_assign
-import matplotlib.pyplot as plt
 
 amenity_weights_dict = { "grocery": [3],
 "restaurants": [.75, .45, .25, .25, .225, .225, .225, .225, .2, .2],
@@ -1155,7 +1154,11 @@ def opt_multiple_CP(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
     model.add(model.maximize(model.sum(f[i] for i in range(num_residents))/num_residents))
 
     msol = model.solve(execfile=solver_path, TimeLimit=time_limit, Workers=threads)
-    obj_value = msol.get_objective_values()[0][0]
+    #NEW ALTERED
+    obj_value = msol.get_objective_values() 
+    if isinstance(obj_value, list):
+        obj_value = obj_value[0][0]
+    #NEW ALTERED
 
     str = msol.solver_log
     with open(results_sava_path, 'w') as f:

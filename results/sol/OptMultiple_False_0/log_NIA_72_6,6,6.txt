@@ -1,0 +1,64 @@
+
+Gurobi 12.0.0 (win64) logging started Sat May 31 23:12:00 2025
+
+Set parameter LogFile to value "results\sol\OptMultiple_False_0\log_NIA_72_6,6,6.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  12
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 5854 rows, 6453 columns and 23849 nonzeros
+Model fingerprint: 0x56ac4a95
+Model has 60 simple general constraints
+  60 PWL
+Variable types: 120 continuous, 6333 integer (6333 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 6e+02]
+  Objective range  [2e-02, 2e-02]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 6e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve added 419 rows and 274 columns
+Presolve time: 0.16s
+Presolved: 6273 rows, 6727 columns, 24816 nonzeros
+Variable types: 300 continuous, 6427 integer (6427 binary)
+Found heuristic solution: objective 89.7144447
+
+Root relaxation: objective 9.915493e+01, 2669 iterations, 0.16 seconds (0.10 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   99.15493    0  268   89.71444   99.15493  10.5%     -    0s
+     0     0   98.82000    0  292   89.71444   98.82000  10.1%     -    0s
+H    0     0                      98.4797511   98.82000  0.35%     -    0s
+H    0     0                      98.4819685   98.82000  0.34%     -    0s
+     0     0     cutoff    0        98.48197   98.48197  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 11
+  Cover: 38
+  Implied bound: 48
+  MIR: 7
+  Flow cover: 5
+  GUB cover: 28
+  RLT: 35
+  Relax-and-lift: 74
+
+Explored 1 nodes (3411 simplex iterations) in 0.84 seconds (0.38 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 3: 98.482 98.4798 89.7144 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.848196849900e+01, best bound 9.848196849900e+01, gap 0.0000%

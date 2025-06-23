@@ -13,14 +13,13 @@ import numpy as np
 import pickle
 from greedy import greedy_multiple_depth, greedy_multiple, greedy_single, greedy_single_depth, get_nearest
 
-data_root = "/Users/weimin/Documents/MASC/walkability_data"
-D_NIA = ct_nia_mapping(os.path.join(data_root,"neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
+D_NIA = ct_nia_mapping(os.path.join(data_root,"Neighbourhood Improvement Areas - 4326/processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
 models_folder = "models"
 results_folder = "results"
-results_folder = "saved_results"
 plot_folder = "results_plot"
-data_root = "/Users/weimin/Documents/MASC/walkability_data"
+data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
 processed_folder= "processed_results"
 preprocessing_folder = "./preprocessing"
 
@@ -31,7 +30,7 @@ net_save_path = os.path.join(preprocessing_folder, 'saved_nets')
 df_save_path = os.path.join(preprocessing_folder, 'saved_dfs')
 sp_save_path = os.path.join(preprocessing_folder, 'saved_SPs')
 
-nia=43
+nia= 43
 k_name = 2
 
 myhatch = 'o'
@@ -59,33 +58,83 @@ if __name__ == "__main__":
     prec = 2
 
     # load dfs
-    all_strs = ['residential', 'mall', 'parking', 'grocery', 'school', 'coffee', 'restaurant']
+    all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant']
     colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange']
     df_filenames = ["NIA_%s_%s.pkl" % (nia, str) for str in all_strs]
-    all_dfs = [pd.read_pickle(os.path.join(df_save_path, df_filename)) for df_filename in df_filenames]
-    residentials_df, malls_df, parking_df, grocery_df, school_df, coffee_df, restaurant_df = all_dfs
+
+    all_dfs = []
+    for df_filename in df_filenames:
+        file_path = os.path.join(df_save_path, df_filename)
+        if os.path.exists(file_path):
+            try:
+                all_dfs.append(pd.read_pickle(file_path))
+            except Exception as e:
+                print(f"Error loading {df_filename}: {e}")
+        else:
+            print(f"Skipping missing file: {df_filename}")
+
+    # Ensure all_dfs has the correct number of elements, replacing missing ones with empty DataFrames
+    while len(all_dfs) < len(all_strs):
+        all_dfs.append(pd.DataFrame())  # Add an empty DataFrame for missing data
+
+    residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df = all_dfs
 
     # load SP
     SP_filename = "NIA_%s_prec_%s.txt" % (nia, prec)
     D = np.loadtxt(os.path.join(sp_save_path, SP_filename))
 
-    allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s,%s,%s.pkl" % (nia, k_name,k_name,k_name))
-    #pd.DataFrame.from_dict(allocated_D).to_csv(allocated_f_name)
-    with open(allocated_f_name, 'rb') as f:
-        sol = pickle.load(f)
+    allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s,%s,%s.pkl" % (nia, k_name, k_name, k_name))
+
+    if os.path.exists(allocated_f_name):
+        with open(allocated_f_name, 'rb') as f:
+            sol = pickle.load(f)
+    else:
+        print(f"Skipping missing allocation file: {allocated_f_name}")
+        sol = None  # Set sol to None or an empty dictionary if you need to reference it later
+
 
     ax = pednet_nia.plot(figsize=(15, 15), color='blue', markersize=1)
-    res = residentials_df.plot(ax=ax,color='green', markersize=80, label='Residential location')
-    parking = parking_df.plot(ax=ax,color='gray', markersize=80, label='Parking lot') #,fontsize=20
-    grocery = grocery_df.plot(ax=ax,color='red', markersize=80, label='Existing grocery')
-    res = restaurant_df.plot(ax=ax, color='orange', markersize=80, label='Existing restaurant')
-    school = school_df.plot(ax=ax, color='yellow', markersize=80, label='Existing school')
+    
+    if residentials_df is not None and not residentials_df.empty:
+        res = residentials_df.plot(ax=ax, color='green', markersize=80, label='Residential location')
+    else:
+        print("Skipping plot: No residential data available for this NIA.")
+
+    if parking_df is not None and not parking_df.empty:
+        parking = parking_df.plot(ax=ax, color='gray', markersize=80, label='Parking lot')
+    else:
+        print("Skipping plot: No parking data available for this NIA.")
+    #,fontsize=20
+    
+    if grocery_df is not None and not parking_df.empty:
+        grocery = grocery_df.plot(ax=ax,color='red', markersize=80, label='Existing grocery')
+    else:
+        print("Skipping plot: No grocery data available for this NIA.")
+    
+    if restaurant_df is not None and not parking_df.empty:
+        res = restaurant_df.plot(ax=ax, color='orange', markersize=80, label='Existing restaurant')
+    else:
+        print("Skipping plot: No restaurant data available for this NIA.")
+    
+    if school_df is not None and not parking_df.empty:
+        school = school_df.plot(ax=ax, color='yellow', markersize=80, label='Existing school')
+    else:
+        print("Skipping plot: No school data available for this NIA.")
+    
+    all_dfs.append(pd.read_pickle(file_path) if os.path.exists(file_path) else pd.DataFrame())
 
 
-    allocated_grocery = parking_df.iloc[sol["allocate_row_id_grocery"]]
-    allocated_grocery2=allocated_grocery.copy()
-    allocated_grocery2["geometry"] = allocated_grocery["geometry"].scale(myscale,myscale, origin='center')
-    allocated_grocery2.plot(ax=ax, edgecolor='black',facecolor='red', hatch=myhatch,markersize=80, label='Allocated grocery', zorder=100)
+    if sol is not None:
+        allocated_grocery = parking_df.iloc[sol["allocate_row_id_grocery"]]
+        #ALTERED move the ff block of codes in if-sttmnt to handle nonetype error
+        allocated_grocery2=allocated_grocery.copy()
+        allocated_grocery2["geometry"] = allocated_grocery["geometry"].scale(myscale,myscale, origin='center')
+        allocated_grocery2.plot(ax=ax, edgecolor='black',facecolor='red', hatch=myhatch,markersize=80, label='Allocated grocery', zorder=100)
+    else:
+        print("Skipping allocation: No allocation data available for this NIA.")
+        allocated_grocery = None  # Set to None or an empty DataFrame if needed
+
+    
 
     allocated_res = parking_df.iloc[sol["allocate_row_id_restaurant"]]
     allocated_res2 = allocated_res.copy()
@@ -110,7 +159,14 @@ if __name__ == "__main__":
     #last_patch = mpatches.Patch(color=colors[all_strs.index(args.amenity)], label='Existing amenity')
     plt.rcParams['hatch.linewidth'] = 2.0
 
-    plt.legend(handles=[gray_patch,green_patch,red_patch,orange_patch,yellow_patch,red_patch2,orange_patch2,yellow_patch2])
+    #plt.legend(handles=[gray_patch,green_patch,red_patch,orange_patch,yellow_patch,red_patch2,orange_patch2,yellow_patch2])
+    plt.legend(
+        handles=[gray_patch, green_patch, red_patch, orange_patch, yellow_patch, red_patch2, orange_patch2, yellow_patch2],
+        loc='lower left',  # Change legend position
+        fontsize=20,       # Adjust font size
+        frameon=True,      # Optional: adds a border box
+        ncol=1             # Optional: controls number of columns
+    )
 
 
     plt.title("neighbourhood: %s" % (D_NIA[nia]['name']))

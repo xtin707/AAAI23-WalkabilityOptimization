@@ -255,7 +255,8 @@ def get_SP(transit_ped_net,save_path):
 if __name__ == "__main__":
     # creating network graph
 
-    pednet = gpd.read_file("zip://data/pednet.zip")
+    pednet = gpd.read_file(file_path = "C:\\Users\\ASUS\\AAAI23-WalkabilityOptimization\\pednet.zip")
+
     # pednet.head(2)
     print(pednet.crs)
     crs = {'init': 'epsg:4326'}

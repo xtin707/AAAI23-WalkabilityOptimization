@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+125,Ionview,3,3,3,77.57451216557617,386.5308890697268,"[451.2299849304379, 735.7275095991068, 879.5486909723259, 925.0185951132823, 984.6041018155069, 1101.3177218911355, 1244.596424990994, 1416.2421423619453, 2400.0, 2400.0]",435.6279542261055,0.4377715587615967,145,28,3,5,1,

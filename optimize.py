@@ -12,6 +12,14 @@ from pathlib import Path
 import numpy as np
 import pickle
 from greedy import greedy_multiple_depth, greedy_multiple, greedy_single, greedy_single_depth, get_nearest, greedy_multiple_lazy
+import sys
+from docplex.cp.config import context
+
+# Update this line with the exact path to cpoptimizer.exe
+context.solver.local.execfile = r"C:\Program Files\IBM\ILOG\CPLEX_Studio2212\cpoptimizer\bin\x64_win64\cpoptimizer.exe"
+
+
+
 
 parser = argparse.ArgumentParser(description='Enter model name:grb_PWL,scratch')
 parser.add_argument("model", help="model", type=str)
@@ -22,21 +30,41 @@ parser.add_argument("--k", help="upper bound", type=int)
 parser.add_argument("--k_array", help="upper bound", type=str)
 parser.add_argument("--bp", help="whether to set branching priority", default=False,type=lambda x: (str(x).lower() == 'true'))
 parser.add_argument("--focus", help="MIPFocus parameter", default=0,type=int)
-args = parser.parse_args()
 
+# NEW alter args = parser.parse_args() with: 
+args, unknown = parser.parse_known_args()
+
+#NEW ADDED FEATURE FOR CHECKING: 
+print("Received arguments:", sys.argv)
+
+if unknown:
+    print("Ignoring unknown arguments:", unknown)
 
 if args.cc:
-    data_root = "/home/huangw98/projects/def-khalile2/huangw98/walkability_data"
+    data_root = "/home/huangw98/projects/def-khalile2/huangw98/walkability_datapi"
     preprocessing_folder = "./preprocessing"
     threads = 8
     solver_path = "/home/huangw98/modulefiles/mycplex/cpoptimizer/bin/x86-64_linux/cpoptimizer"
 else:
-    data_root = "/Users/weimin/Documents/MASC/walkability_data"
+    data_root = r"C:\Users\annve\Downloads\AAAI23-WalkabilityOptimization" #NEW ALTERED
     preprocessing_folder = "./preprocessing"
-    threads = 18
-    solver_path = "/Applications/CPLEX_Studio201/cpoptimizer/bin/x86-64_osx/cpoptimizer"
+    threads = 12
+    # CHANGED 18 to 12
+    solver_path = r"C:\Program Files\IBM\ILOG\CPLEX_Studio2212\cpoptimizer\bin\x64_win64\cpoptimizer.exe"
+    
 
-D_NIA = ct_nia_mapping(os.path.join(data_root,"neighbourhood-improvement-areas-wgs84/processed_TSNS 2020 NIA Census Tracts.xlsx"))
+# NEW Construct the file path using os.path.join with separate arguments.
+file_path = os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx")
+#NEW ADDED FEATURE FOR CHECKING: print("Looking for file at:", file_path)
+
+# Read the Excel file into a DataFrame
+df = pd.read_excel(file_path)
+
+#NEW ADDED FEATURE FOR CHECKING Display the first few rows
+#print(df.head())  # Print first 5 rows
+
+
+D_NIA = ct_nia_mapping(file_path)
 
 models_folder = "models"
 results_folder = "results"
@@ -44,7 +72,7 @@ Path(models_folder).mkdir(parents=True,exist_ok=True)
 Path(results_folder).mkdir(parents=True,exist_ok=True)
 
 net_save_path = os.path.join(preprocessing_folder, 'saved_nets')
-df_save_path = os.path.join(preprocessing_folder, 'saved_dfs')
+df_save_path = os.path.join(os.getcwd(), "preprocessing", "saved_dfs")
 sp_save_path = os.path.join(preprocessing_folder, 'saved_SPs')
 
 model_save_name = args.model + "_" + str(args.bp) + "_" + str(args.focus)
@@ -58,9 +86,22 @@ Path(sol_folder).mkdir(parents=True,exist_ok=True)
 Path(summary_folder).mkdir(parents=True,exist_ok=True)
 
 if __name__ == "__main__":
+    nia_list = [int(x) for x in args.nias.split(',') if x.strip().isdigit()]
+    #  NEW ADDED block
+    nia_remap = {
+        137: [141, 142],
+        26: [154, 155]
+    }
 
-    nia_list = [int(x) for x in args.nias.split(',')]
-
+    expanded_nia_list = []
+    for nia in nia_list:
+        if nia in nia_remap:
+            expanded_nia_list.extend(nia_remap[nia])
+        else:
+            expanded_nia_list.append(nia)
+    nia_list = expanded_nia_list
+    # --- end of added block
+    
     pednet = load_pednet(data_root)
     nia_id_L = []
     nia_name_L = []
@@ -85,21 +126,21 @@ if __name__ == "__main__":
         pednet_nia = pednet_NIA(pednet, nia_id, preprocessing_folder)
         print("NIA ",nia_id)
 
-        # # load net
+        #NEW UNCOMMENT load net
         prec = 2
-        # net_filename = "NIA_%s_prec_%s.hd5" % (nia_id, prec)
-        # if os.path.exists(os.path.join(net_save_path, net_filename)):
-        #     transit_ped_net = pdna.Network.from_hdf5(os.path.join(net_save_path, net_filename))
-        # else:
-        #     G = create_graph(pednet_nia, precision=prec)
-        #     transit_ped_net = get_pandana_net(G, os.path.join(net_save_path, net_filename))
+        net_filename = "NIA_%s_prec_%s.hd5" % (nia_id, prec)
+        if os.path.exists(os.path.join(net_save_path, net_filename)):
+            transit_ped_net = pdna.Network.from_hdf5(os.path.join(net_save_path, net_filename))
+        else:
+            G = create_graph(pednet_nia, precision=prec)
+            transit_ped_net = get_pandana_net(G, os.path.join(net_save_path, net_filename))
 
         # load dfs
-        all_strs = ['residential', 'mall', 'parking', 'grocery', 'school', 'coffee', 'restaurant']
+        all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant']
         colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange']
         df_filenames = ["NIA_%s_%s.pkl" % (nia_id, str) for str in all_strs]
         all_dfs = [pd.read_pickle(os.path.join(df_save_path, df_filename)) for df_filename in df_filenames]
-        residentials_df, malls_df, parking_df, grocery_df, school_df, coffee_df, restaurant_df = all_dfs
+        residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df = all_dfs
 
         # load SP
         SP_filename = "NIA_%s_prec_%s.txt" % (nia_id, prec)
@@ -282,9 +323,20 @@ if __name__ == "__main__":
         # text_file.write(log)
         # text_file.close()
 
+        print("D_NIA keys:", list(D_NIA.keys()))  # Print all available keys in D_NIA
+        print("Attempting to access nia_id:", nia_id)  # Print the nia_id value before accessing
+
+        # Check if the key exists before accessing it
+        if nia_id in D_NIA:
+            print("Key exists! Proceeding with access.")
+            nia_name_L.append(D_NIA[nia_id]['name'])
+        else:
+            print(f"Key {nia_id} not found in D_NIA!")
+            nia_name_L.append("Unknown")  # Handle missing key case
+    
+            
         # save summary
         nia_id_L.append(nia_id)
-        nia_name_L.append(D_NIA[nia_id]['name'])
 
         if args.model in ['OptSingle', 'OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
             dist_obj_L.append(dist_obj)
@@ -351,10 +403,15 @@ if __name__ == "__main__":
             else:
                 fig_name = "nia_%s_%s_allocation_%s.png" % (nia_id, 0, args.amenity)
 
+
+            print("Saving figure to:", os.path.join(visual_folder, fig_name))
+            plt.savefig(os.path.join(visual_folder, fig_name))
+            print("Figure saved.")
+
             plt.savefig(os.path.join(visual_folder,fig_name))
 
         # save results summary
-
+        os.makedirs(summary_folder, exist_ok=True)
         if args.model in ['OptSingle', 'OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
             results_D = {
                 "nia_id": nia_id_L,
@@ -384,10 +441,34 @@ if __name__ == "__main__":
                 "model_status": status_L
             }
             summary_df_filename = os.path.join(summary_folder, "NIA_%s_%s.csv" % (nia_id, k_name))
+            
+        expected_len = len(next(iter(results_D.values())))
+        for key, val in results_D.items():
+            if len(val) != expected_len:
+                print(f"❌ Mismatch in '{key}': expected {expected_len}, got {len(val)}")
 
 
         summary_df = pd.DataFrame(results_D)
         summary_df.to_csv(summary_df_filename,index=False)
+        
+    
+        
+        '''
+        # Print lengths of all lists in results_D
+        list_lengths = {key: len(value) for key, value in results_D.items()}
+        print("List lengths:", list_lengths)
 
+            # Find the unique lengths (should be just one unique value)
+        unique_lengths = set(list_lengths.values())
+        print("Unique lengths:", unique_lengths)
 
+            # Find the maximum list length
+        max_len = max(list_lengths.values())
+
+            # Identify lists with incorrect length
+        for key, length in list_lengths.items():
+            if length != max_len:
+                print(f"⚠️ {key} has length {length}, expected {max_len}")    '''
+
+        
 
