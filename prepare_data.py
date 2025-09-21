@@ -4,12 +4,12 @@ from map_utils import *
 from pathlib import Path
 import argparse
 import networkx as nx
-import geopandas as gpd
 import matplotlib.pyplot as plt
-
+import geopandas as gpd
 
 # def of tags: https://wiki.openstreetmap.org/wiki/Map_features#Others
 #POI['geometry'] some are points, some are polygon
+
 
 
 def pednet_preprocessing():
@@ -40,6 +40,7 @@ def nia_preprocessing(nia_id):
     "amenity": "marketplace",
     "landuse": "retail"}
     tag_cafe= {"amenity":"cafe", "cuisine":"coffee_shop"}
+    tag_healthcare= {"amenity":["clinic", "hospital", "pharmacy"]}
     pednet = load_pednet(data_root)
 
 
@@ -75,11 +76,12 @@ def nia_preprocessing(nia_id):
     school_df=query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values,tag_school)
     cafe_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_cafe)
     restaurant_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_restaurant)
+    healthcare_df = query_ox(get_NIAs_boundary(nia_id, "ox", data_root).geometry.values, tag_healthcare)
 
 
-    all_dfs=[residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df]
-    all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe','restaurant']
-    colors = ['g','lightcoral','grey','red','yellow','brown','orange']
+    all_dfs=[residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df, healthcare_df]
+    all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe','restaurant', 'healthcare']
+    colors = ['g','lightcoral','grey','red','yellow','brown','orange','green']
 
     ax = pednet_nia.plot(figsize=(15, 15), color='blue', markersize=1)
 
@@ -106,17 +108,12 @@ def nia_preprocessing(nia_id):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='parser')
-    parser.add_argument("cc", help="run on compute canada?",
-                        type=int)
     parser.add_argument("--nia", help="proprocess data for nia",
                         type=int)
 
     args = parser.parse_args()
 
-    if args.cc == 1:
-        data_root = "/home/huangw98/projects/def-khalile2/huangw98/walkability_data"
-    else:
-        data_root = "C:\\Users\\annve\\Downloads\\AAAI23-WalkabilityOptimization"
+    data_root = "C:\\Users\\annve\\Downloads\\Walkability For All"
     
 
     preprocessing_folder = "./preprocessing"

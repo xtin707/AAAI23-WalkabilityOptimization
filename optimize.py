@@ -1,8 +1,6 @@
 from graph_utils import *
 from map_utils import *
-#from CP_models import *
-#from MIP_models import *
-from model_latest import opt_single, cur_assignment_single, opt_multiple, opt_single_depth, cur_assignment_single_depth, weights_array, dist_to_score, L_a, L_f_a, opt_multiple_depth, weights_array_multi, choice_weights, opt_single_CP, opt_multiple_CP,opt_single_depth_CP, opt_multiple_depth_CP
+from model_latest import  opt_multiple, weights_array, dist_to_score, L_a, L_f_a, opt_multiple_depth, weights_array_multi, choice_weights
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import argparse
@@ -10,22 +8,17 @@ import os
 from pathlib import Path
 import numpy as np
 import pickle
-from greedy import greedy_multiple_depth, greedy_multiple, greedy_single, greedy_single_depth, get_nearest, greedy_multiple_lazy
+from greedy import greedy_multiple_depth, greedy_multiple, get_nearest, greedy_multiple_lazy
 import sys
 from docplex.cp.config import context
-
-# Update this line with the exact path to cpoptimizer.exe
-context.solver.local.execfile = r"C:\Program Files\IBM\ILOG\CPLEX_Studio2212\cpoptimizer\bin\x64_win64\cpoptimizer.exe"
-
-
 
 
 parser = argparse.ArgumentParser(description='Enter model name:grb_PWL,scratch')
 parser.add_argument("model", help="model", type=str)
 parser.add_argument("nias", help="nias to run", type=str)
-parser.add_argument("--cc", help="run on compute canada?", type=bool)
-parser.add_argument("--amenity", help="run on compute canada?", type=str)
-parser.add_argument("--k", help="upper bound", type=int)
+#parser.add_argument("--cc", help="run on compute canada?", type=bool)
+#parser.add_argument("--amenity", help="run on compute canada?", type=str)
+#parser.add_argument("--k", help="upper bound", type=int)
 parser.add_argument("--k_array", help="upper bound", type=str)
 parser.add_argument("--bp", help="whether to set branching priority", default=False,type=lambda x: (str(x).lower() == 'true'))
 parser.add_argument("--focus", help="MIPFocus parameter", default=0,type=int)
@@ -39,17 +32,11 @@ print("Received arguments:", sys.argv)
 if unknown:
     print("Ignoring unknown arguments:", unknown)
 
-if args.cc:
-    data_root = "/home/huangw98/projects/def-khalile2/huangw98/walkability_datapi"
-    preprocessing_folder = "./preprocessing"
-    threads = 8
-    solver_path = "/home/huangw98/modulefiles/mycplex/cpoptimizer/bin/x86-64_linux/cpoptimizer"
-else:
-    data_root = r"C:\Users\annve\Downloads\AAAI23-WalkabilityOptimization" #NEW ALTERED
-    preprocessing_folder = "./preprocessing"
-    threads = 12
-    # CHANGED 18 to 12
-    solver_path = r"C:\Program Files\IBM\ILOG\CPLEX_Studio2212\cpoptimizer\bin\x64_win64\cpoptimizer.exe"
+
+data_root = r"C:\Users\annve\Downloads\Walkability For All"
+preprocessing_folder = "./preprocessing"
+threads = 12
+#solver_path = r"C:\Program Files\IBM\ILOG\CPLEX_Studio2212\cpoptimizer\bin\x64_win64\cpoptimizer.exe"
     
 
 # NEW Construct the file path using os.path.join with separate arguments.
