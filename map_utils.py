@@ -263,9 +263,8 @@ def map_back_assign(assignments, df_from, df_to, dict):
     return assign_D
 
 if __name__ == "__main__":
-    #D=ct_nia_mapping()
-    #b=1
-    data_root = "C:\\Users\\ASUS\\AAAI23-WalkabilityOptimization"
+    
+    data_root = r"C:\Users\annve\Downloads\AAAI23-WalkabilityOptimization" #NEW ALTERED
 
 
 

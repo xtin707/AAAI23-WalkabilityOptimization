@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+110,Keelesdale-Eglinton West,9,9,9,94.23000247619784,223.0052524465818,"[249.73156974147358, 335.1971908470102, 388.88108512150853, 464.8400985690529, 524.8773704471104, 568.1727679336149, 616.0902547581537, 680.6197128166048, 723.7213711897555, 775.4365108507478]",249.68822765436823,4.601716756820679,207,42,16,13,4,

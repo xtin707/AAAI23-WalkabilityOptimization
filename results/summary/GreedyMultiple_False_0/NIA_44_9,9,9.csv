@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+44,Flemingdon Park,9,9,9,97.50778546501054,161.24096661955534,174.12140730026098,183.8360444083109,2.4676921367645264,65,68,4,5,5,

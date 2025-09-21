@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+61,Taylor-Massey,7,7,7,96.73109793890052,174.88922981260316,247.19395993698924,271.95326545827464,0.4512598514556885,103,17,9,4,3,

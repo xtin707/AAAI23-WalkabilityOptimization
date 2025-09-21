@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+72,Regent Park,1,1,1,78.53582261311358,171.7441678690035,"[245.69405841244188, 415.59449064599414, 571.653031275867, 811.8925930903282, 2400.0, 2400.0, 2400.0, 2400.0, 2400.0, 2400.0]",308.0602441214602,0.161726713180542,60,31,7,3,1,

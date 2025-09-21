@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+91,Weston-Pellam Park,5,5,5,93.78332948126086,245.8241098346865,"[330.90103585947327, 409.84230439998225, 480.12654789855594, 504.0970211152156, 546.7731980924184, 564.7734461472095, 588.6457601452697, 612.6814997609985, 640.7083774418572, 661.0167640236185]",287.419038722807,1.6178247928619385,209,20,7,14,4,

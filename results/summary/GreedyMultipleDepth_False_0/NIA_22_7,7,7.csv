@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+22,Humbermede,7,7,7,86.80383319996508,388.9823024676546,"[512.660998365638, 565.9870635406544, 606.7591597842347, 695.6975149413557, 699.7198934276355, 717.9269551523917, 735.8205607155396, 750.596519566526, 943.7018499475515, 1057.2395719614926]",377.11549746497997,5.430413484573364,218,54,9,16,5,

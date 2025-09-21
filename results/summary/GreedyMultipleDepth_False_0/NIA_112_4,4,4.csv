@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+112,Beechborough-Greenbrook,4,4,4,75.85469094138159,336.65216465744237,"[371.56536553330125, 478.8205007480526, 709.7501945668035, 768.3676301321863, 831.6745028552385, 2400.0, 2400.0, 2400.0, 2400.0, 2400.0]",347.3273112140202,0.5213735103607178,96,35,5,1,2,

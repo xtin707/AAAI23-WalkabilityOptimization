@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+6,Kingsview Village-The Westway,2,2,2,"(85.29951791206096,)",512.0581672198384,607.4363177619897,455.9506883260274,20911.4,319,74,7,2,6,Feasible

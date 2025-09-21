@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+138,Eglinton East,9,9,9,90.34283484012235,272.25650853766734,"[317.9660867399562, 448.74750239362237, 556.889775450091, 657.5476380321758, 760.8189046956034, 834.4037836950145, 917.0973761240515, 1009.7580586244945, 1071.619606483096, 1255.526529709241]",311.6851785038265,11.424601554870605,240,66,9,14,6,

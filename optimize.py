@@ -1,6 +1,5 @@
 from graph_utils import *
 from map_utils import *
-import model_latest
 #from CP_models import *
 #from MIP_models import *
 from model_latest import opt_single, cur_assignment_single, opt_multiple, opt_single_depth, cur_assignment_single_depth, weights_array, dist_to_score, L_a, L_f_a, opt_multiple_depth, weights_array_multi, choice_weights, opt_single_CP, opt_multiple_CP,opt_single_depth_CP, opt_multiple_depth_CP

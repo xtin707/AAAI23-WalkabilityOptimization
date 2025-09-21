@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+139,Scarborough Village,1,1,1,76.41674029160593,409.1676600754659,"[479.43328593138006, 625.1925993049515, 756.099716953921, 959.1921944839777, 1129.2908742184256, 1238.1261403010947, 1308.895770720927, 1472.753549962616, 2400.0, 2400.0]",464.5802712023979,0.4462015628814697,163,53,13,7,5,

@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+28,Rustic,7,7,7,91.08280925415731,387.79372344387684,361.9862571328161,391.7948880857619,1.1861090660095215,148,26,1,2,3,

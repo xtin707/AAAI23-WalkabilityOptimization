@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+2,Mount Olive-Silverstone-Jamestown,1,1,1,64.67565480724907,493.3138950898705,"[560.9349284474888, 961.1731861305457, 1168.4948606002397, 1366.8154585678415, 1755.2278754948125, 1906.2180320345299, 2125.1452495952285, 2774.7502125637525, 2400.0, 2400.0]",392.3650649952064,1.6213188171386719,365,75,12,7,10,

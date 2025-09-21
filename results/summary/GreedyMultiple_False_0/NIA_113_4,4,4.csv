@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+113,Weston,4,4,4,95.0350633371586,253.21547569911831,308.4631047504998,377.7729969673694,6.042072057723999,228,66,32,23,5,

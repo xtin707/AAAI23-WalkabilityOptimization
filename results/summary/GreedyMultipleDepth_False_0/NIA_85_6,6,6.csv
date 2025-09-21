@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+85,South Parkdale,6,6,6,96.1283130883226,155.00589621724959,"[204.74543816859497, 299.67841924853354, 377.4971871317616, 442.7346624929939, 491.6233155758095, 552.2201865863007, 592.1131023390416, 624.6974605109123, 665.6905526233429, 705.7041291800406]",243.0667356844895,5.998559474945068,137,90,14,25,3,

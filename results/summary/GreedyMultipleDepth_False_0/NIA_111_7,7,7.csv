@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+111,Rockcliffe-Smythe,7,7,7,84.94292149562595,280.7488332270189,"[453.93173747869304, 604.4157656163213, 756.8269959736167, 844.4855564817984, 1009.3518024657509, 1167.398868097294, 1267.5500497934897, 1404.8578558365, 1477.9298191800917, 1585.562602584482]",346.9719845167097,9.29688310623169,384,58,17,10,9,

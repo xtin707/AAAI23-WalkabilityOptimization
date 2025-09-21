@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+142,Woburn North,7,7,7,81.369599569225,424.4075714140379,"[420.16320211912006, 666.48945927277, 799.16716531297, 914.9233584439203, 1035.78715019061, 1158.623133933987, 1243.4138519192747, 1326.4397277417552, 1386.9112320856345, 1510.2043294545092]",374.5260407793337,18.023873567581177,420,81,16,18,9,

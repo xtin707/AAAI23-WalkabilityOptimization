@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+124,Kennedy Park,8,8,8,88.08978350113343,326.662519265091,"[395.02187061128024, 524.5215468195344, 588.9831420205803, 681.8314110565591, 814.2956742193263, 922.6545378228067, 1033.9574628978155, 1137.5728012531322, 1199.2440371152702, 1368.0806633488962]",279.27746853447997,7.789187669754028,213,52,7,7,7,

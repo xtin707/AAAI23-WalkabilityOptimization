@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+3,Thistletown-Beaumond Heights,4,4,4,85.80764323160018,367.31270770253144,"[371.28382071238076, 600.2342779738101, 700.99572878537, 817.0884318281194, 876.9119997806991, 890.0555715373896, 964.6384477469616, 1018.1410829418749, 1037.029485702431, 1060.4538319714936]",420.72764733985423,1.8582353591918945,242,31,6,18,4,

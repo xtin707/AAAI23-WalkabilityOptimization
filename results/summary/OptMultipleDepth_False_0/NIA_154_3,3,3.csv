@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+154,Oakdale-Beverley Heights,3,3,3,77.29771351892079,408.35379898752683,"[540.6090831188379, 848.1325370672764, 1132.9274507375585, 1104.1866361495718, 1390.2300298308578, 1374.099659310393, 1352.8830861448746, 1367.53894321275, 1497.6518417417367, 1495.9368817976008]",411.61282261499036,30694.66100001335,320,82,19,12,8,9

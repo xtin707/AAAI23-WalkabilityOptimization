@@ -1307,7 +1307,7 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
             filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
 
             if use == 'mip':
-                #  MIP
+                #  MILP
                 if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)):
                     mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
                     dist_grocery = mip_df["dist_grocery"]
@@ -1538,7 +1538,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
 def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_folder):
     
     SIZE=7
-    plt.figure(dpi=300)
+    plt.figure(dpi=900)
 
     '''plot code reference: https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb'''
 
@@ -1590,13 +1590,13 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
     nia_shape["delta"] = nia_shape["walk_obj_3"]-nia_shape["walk_obj_0"]
 
     # ALTERED ax=nia_shape.plot(column='delta',legend=True, legend_kwds={'shrink': 0.5},cmap='viridis', edgecolor='white',linewidth=0.5)
-    vmin, vmax = 10, 55
+    #vmin, vmax = 10, 55
     ax = nia_shape.plot(
         column='delta',
         cmap='viridis',
         legend=True,
-        vmin=vmin,
-        vmax=vmax,
+        #vmin=vmin,
+        #vmax=vmax,
         legend_kwds={'shrink': 0.5},
         edgecolor='white',
         linewidth=0.5
@@ -1606,7 +1606,7 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_fo
     # Colorbar tick formatting
     cbar = ax.get_figure().get_axes()[1]
     cbar.yaxis.set_major_locator(ticker.MultipleLocator(10))
-    cbar.set_ylim(vmin, vmax)
+    #cbar.set_ylim(vmin, vmax)
     
     
     texts = []
@@ -1728,8 +1728,7 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
 
     ax1.legend(prop={'size': BIGGER_SIZE})
     ax2.legend(prop={'size': BIGGER_SIZE},loc='upper left')
-    #plt.xlabel("k")
-    #plt.ylabel("dist (m)")
+  
 
     plt.rc('font', size=BIGGER_SIZE)  # controls default text sizes
     plt.rc('axes', titlesize=BIGGER_SIZE)  # fontsize of the axes title
@@ -1870,6 +1869,6 @@ if __name__ == "__main__":
     nia_avg_walking_time(data_root,plot_folder,results_folder,preprocessing_folder)
     nia_avg_walking_time_2(data_root, plot_folder, results_folder, preprocessing_folder)
     hist_distances(data_root, results_folder,processed_folder,plot_folder)
-    avg_obj_vs_k_multi(results_folder, plot_folder)
+    #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
-
+    #quality_table(results_folder, processed_folder)

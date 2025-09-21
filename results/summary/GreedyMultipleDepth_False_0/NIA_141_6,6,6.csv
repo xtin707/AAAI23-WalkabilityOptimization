@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+141,Golfdale-Cedarbrae-Woburn,6,6,6,71.28342635083175,494.8296921363552,"[609.2126942488203, 937.3905078374652, 1114.97745236797, 1171.884369365884, 1300.1725934874246, 1464.585932044567, 1621.4436409468487, 1685.5263312808268, 1764.943636620458, 1946.8121350674614]",473.1879901364612,8.293271541595459,574,51,18,6,8,

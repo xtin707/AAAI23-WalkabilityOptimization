@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+21,Humber Summit,7,7,7,89.17441626080456,328.78262922620945,"[366.7404271213457, 472.88787875906496, 557.2492869242666, 619.233832602289, 705.5349783715216, 786.0401042180819, 892.6303170794207, 965.8097509749949, 1050.1050989006, 1155.35466505464]",344.24025446643964,4.35300612449646,215,50,16,12,4,

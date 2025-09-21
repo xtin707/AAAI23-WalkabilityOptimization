@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+136,West Hill,7,7,7,79.12015026898608,447.08849341425304,"[507.9501367953164, 671.4100677269233, 774.2963817662454, 951.2713167654146, 1081.8778507091329, 1173.1472169507779, 1283.6191832103486, 1402.266122370821, 1482.6008561805525, 1553.1577189049187]",419.7344629311082,36.8484890460968,538,107,9,13,11,

@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+24,Black Creek,1,1,1,55.95629903696994,626.0819498583861,"[614.1275549090068, 1045.464925003233, 1616.0344069103667, 2279.9709832914223, 2400.0, 2400.0, 2400.0, 2400.0, 2400.0, 2400.0]",386.5122391819382,0.8984699249267578,264,88,5,3,7,

@@ -1,0 +1,2 @@
+nia_id,nia_name,k_L_grocery,k_L_restaurant,k_L_school,obj,dist_obj_L_grocery,dist_obj_L_restaurant,dist_obj_L_school,solving_time,num_res,num_parking,num_existing_L_grocery,num_existing_L_restaurant,num_existing_L_school,model_status
+135,Morningside,6,6,6,64.1718642934748,454.78540959781964,"[603.2223484279071, 893.4085927822146, 1412.3668175910616, 1485.5770983228085, 1542.317538400499, 1606.3486925288087, 2183.788147951991, 2618.2198209631397, 3405.6586736090703, 2400.0]",460.53359693182085,2.8643155097961426,368,40,4,3,8,
