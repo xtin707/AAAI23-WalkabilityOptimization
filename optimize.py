@@ -16,9 +16,6 @@ from docplex.cp.config import context
 parser = argparse.ArgumentParser(description='Enter model name:grb_PWL,scratch')
 parser.add_argument("model", help="model", type=str)
 parser.add_argument("nias", help="nias to run", type=str)
-#parser.add_argument("--cc", help="run on compute canada?", type=bool)
-#parser.add_argument("--amenity", help="run on compute canada?", type=str)
-#parser.add_argument("--k", help="upper bound", type=int)
 parser.add_argument("--k_array", help="upper bound", type=str)
 parser.add_argument("--bp", help="whether to set branching priority", default=False,type=lambda x: (str(x).lower() == 'true'))
 parser.add_argument("--focus", help="MIPFocus parameter", default=0,type=int)
@@ -97,15 +94,11 @@ if __name__ == "__main__":
     num_allocations_L = []
     status_L = []
 
-    if args.model in ['OptSingle', 'OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
-        num_existing_L = []
-        dist_obj_L = []
-        k_L = []
 
-    elif args.model in ['OptMultiple', 'OptMultipleDepth','OptMultipleCP','OptMultipleDepthCP','GreedyMultipleDepth','GreedyMultiple','GreedyMultipleLazy']:
-        num_existing_L_grocery, num_existing_L_restaurant, num_existing_L_school = [], [], []
-        dist_obj_L_grocery, dist_obj_L_restaurant, dist_obj_L_school = [], [], []
-        k_L_grocery, k_L_restaurant, k_L_school = [], [], []
+    #if args.model in ['OptMultiple', 'OptMultipleDepth','GreedyMultipleDepth','GreedyMultiple','GreedyMultipleLazy']:
+    num_existing_L_grocery, num_existing_L_restaurant, num_existing_L_school, num_existing_L_healthcare = [], [], [], []
+    dist_obj_L_grocery, dist_obj_L_restaurant, dist_obj_L_school, dist_obj_L_healthcare = [], [], []
+    k_L_grocery, k_L_restaurant, k_L_school, k_L_healthcare = [], [], [], []
 
     for nia_id in nia_list:
 
@@ -122,73 +115,28 @@ if __name__ == "__main__":
             transit_ped_net = get_pandana_net(G, os.path.join(net_save_path, net_filename))
 
         # load dfs
-        all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant']
-        colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange']
+        all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant', 'healthcare']
+        colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange', 'violet']
         df_filenames = ["NIA_%s_%s.pkl" % (nia_id, str) for str in all_strs]
         all_dfs = [pd.read_pickle(os.path.join(df_save_path, df_filename)) for df_filename in df_filenames]
-        residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df = all_dfs
+        residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df, healthcare_df = all_dfs
 
         # load SP
         SP_filename = "NIA_%s_prec_%s.txt" % (nia_id, prec)
         D = np.loadtxt(os.path.join(sp_save_path, SP_filename))
 
-        if args.model in ['OptSingle','OptSingleCP','GreedySingle']:
-            amenity_type = args.amenity
-            amenity_df = all_dfs[all_strs.index(args.amenity)]
-            if args.k:
-                log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s_%s.txt" % (nia_id, args.k, args.amenity))
-                if not 'CP' in args.model:
-                    if (not 'Greedy' in args.model):
-                        score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = opt_single(
-                            residentials_df, parking_df, amenity_df, D, args.k, threads, log_file_name, args.bp, args.focus, EPS = 0.5)
-                    else:
-                        score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = greedy_single(
-                            residentials_df, parking_df, amenity_df, D, args.k)
-                else:
-                    score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = opt_single_CP(
-                        residentials_df, parking_df, amenity_df, D, args.k, threads, log_file_name, solver_path, EPS=0.5)
 
-            else:
-                log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s_%s.txt" % (nia_id, 0, args.amenity))
-                score_obj, dist_obj, solving_time, m, assigned_D, num_residents, num_existing, status = cur_assignment_single(residentials_df,amenity_df, D,args.bp, args.focus,EPS=0.5)
-        elif args.model in ['OptSingleDepth','OptSingleDepthCP','GreedySingleDepth']:
-            amenity_type = args.amenity
-            amenity_df = all_dfs[all_strs.index(args.amenity)]
-            if args.k:
-                log_file_name = os.path.join(sol_folder,"log_NIA_%s_%s_%s.txt" % (nia_id, args.k, args.amenity))
-                if not 'CP' in args.model:
-                    if (not 'Greedy' in args.model):
-                        score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = opt_single_depth(
-                            residentials_df, parking_df, amenity_df, D, args.k, threads, log_file_name, args.bp, args.focus, EPS=0.5)
-                    else:
-                        score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = greedy_single_depth(
-                            residentials_df, parking_df, amenity_df, D, args.k)
-                else:
-                    score_obj, dist_obj, solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, num_existing, status = opt_single_depth_CP(
-                        residentials_df, parking_df, amenity_df, D, args.k, threads, log_file_name, solver_path,args.bp, EPS=0.5)
-            else:
-                log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s_%s.txt" % (nia_id, 0, args.amenity))
-                score_obj, dist_obj, solving_time, m, assigned_D, num_residents, num_existing, status = cur_assignment_single_depth(residentials_df,amenity_df, D,args.bp, args.focus,EPS=0.5)
-
-        elif args.model in ['OptMultiple','OptMultipleCP', 'GreedyMultiple','GreedyMultipleLazy']:
+        if args.model in ['OptMultiple', 'GreedyMultiple']:
             if args.k_array != '0,0,0':
                 k_array = [int(x) for x in args.k_array.split(',')]
                 log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s.txt" % (nia_id, args.k_array))
-                if not 'CP' in args.model:
-                    if not 'Greedy' in args.model:
-                        score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status\
-                            = opt_multiple(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array,threads, log_file_name,args.bp, args.focus, EPS = 0.5)
-                    else:
-                        if 'Lazy' in args.model:
-                            score_obj, [dist_grocery, dist_restaurant,dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
-                                = greedy_multiple_lazy(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D,
-                                              k_array)
-                        else:
-                            score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
-                                = greedy_multiple(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array)
+    
+                if not 'Greedy' in args.model:
+                    score_obj, [dist_grocery, dist_restaurant, dist_school, dist_healthcare], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status\
+                        = opt_multiple(residentials_df, parking_df, grocery_df, restaurant_df, school_df, healthcare_df, D, k_array,threads, log_file_name,args.bp, args.focus, EPS = 0.5)            
                 else:
-                    score_obj, [dist_grocery, dist_restaurant,dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
-                        = opt_multiple_CP(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array,threads, log_file_name, solver_path, EPS = 0.5)
+                    score_obj, [dist_grocery, dist_restaurant, dist_school, dist_healthcare], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
+                        = greedy_multiple(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array)
             else:
                 multiple_dist = []
                 # grocery
@@ -219,7 +167,7 @@ if __name__ == "__main__":
                 solving_time=None
                 status=None
 
-        elif args.model in ['OptMultipleDepth', 'OptMultipleDepthCP', 'GreedyMultipleDepth']:
+        elif args.model in ['OptMultipleDepth', 'GreedyMultipleDepth']:
             if args.k_array != '0,0,0':
                 k_array = [int(x) for x in args.k_array.split(',')]
                 log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s.txt" % (nia_id, args.k_array))
@@ -439,22 +387,7 @@ if __name__ == "__main__":
         
     
         
-        '''
-        # Print lengths of all lists in results_D
-        list_lengths = {key: len(value) for key, value in results_D.items()}
-        print("List lengths:", list_lengths)
-
-            # Find the unique lengths (should be just one unique value)
-        unique_lengths = set(list_lengths.values())
-        print("Unique lengths:", unique_lengths)
-
-            # Find the maximum list length
-        max_len = max(list_lengths.values())
-
-            # Identify lists with incorrect length
-        for key, length in list_lengths.items():
-            if length != max_len:
-                print(f"⚠️ {key} has length {length}, expected {max_len}")    '''
+ 
 
         
 

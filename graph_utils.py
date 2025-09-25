@@ -16,11 +16,9 @@ import json
 preprocessing_folder="preprocessing_pickle4"
 
 def load_pednet(data_root):
-    pednet = gpd.read_file(os.path.join(data_root,"pednet.zip"))
+    pednet = gpd.read_file(os.path.join(data_root,"pednet.zip")).to_crs("EPSG:2019")
     print(pednet.crs)
-    crs = {'init': 'epsg:4326'}
-    pednet = gpd.GeoDataFrame(pednet, crs=crs, geometry='geometry')
-    pednet = pednet.to_crs({'init': 'epsg:2019'})
+   
     pednet = pednet[
         ['OBJECTID', 'road_type', 'sdwlk_code', 'sdwlk_desc', 'crosswalk', 'cwalk_type', 'px', 'px_type', 'geometry']]
     return pednet
@@ -49,18 +47,16 @@ def create_graph(gdf, precision=3):
     def add_edges(row, G):
         geometry = row.geometry
         coords = list(geometry.coords)
-        geom_r = LineString(coords[::-1])
-        coords_r = geom_r.coords
+        
         start = make_node(coords[0], precision)
         end = make_node(coords[-1], precision)
+        
         # Add forward edge
-        fwd_attr = {}
-        for k, v in row.items():
-            fwd_attr[k] = v
+        fwd_attr = {k: v for k, v in row.items()}
         fwd_attr['forward'] = 1
+        
         # fwd_attr['geometry']=  geometry
         fwd_attr['length'] = geometry.length
-
         fwd_attr['visited'] = 0
 
         G.add_edge(start, end, **fwd_attr)
@@ -69,82 +65,10 @@ def create_graph(gdf, precision=3):
 
     return G
 
-# # from https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb
-# def creat_pandana_net_older(G, save_path, save=True): #probably will not use
-#
-#     # create a pandana net
-#     # get network "from" and "to" from nodes
-#     edges = nx.to_pandas_edgelist(G, 'from', 'to')
-#     to = edges['to'].tolist()
-#     fr = edges['from'].tolist()
-#     fr = list(set(fr))
-#     to = list(set(to))
-#     to.extend(fr)
-#     nodes = list(set(to))
-#     nodes = pd.DataFrame(nodes)
-#     nodes.columns = ['x', 'y']
-#     nodes['xy'] = nodes.apply(lambda z: (z.x, z.y), axis=1)
-#
-#     # Assigning node ids to to_node and from_node
-#
-#     nodes['id'] = nodes.index
-#     edges['to_node'] = edges['to'].map(nodes.set_index('xy').id)
-#     edges['from_node'] = edges['from'].map(nodes.set_index('xy').id)
-#
-#     # creating pandana network
-#
-#     transit_ped_net = pdna.Network(nodes["x"],
-#                                    nodes["y"],
-#                                    edges["from_node"],
-#                                    edges["to_node"],
-#                                    pd.DataFrame([edges['length']]).T,
-#                                    twoway=True)
-#
-#     # saving walkability file is optional. It can be used in the next steps if you don't have transit_ped_net in memory
-#     if save==True:
-#         transit_ped_net.save_hdf5(save_path)
-#     return transit_ped_net
-
-# # adapted from https://github.com/gcc-dav-official-github/dav_cot_walkability/blob/master/code/TTC%20Walkability%20Tutorial.ipynb
-# def get_pandana_net_old(G, save_path):
-#     if not os.path.exists(save_path):
-#         # create a pandana net
-#         # get network "from" and "to" from nodes
-#         edges = nx.to_pandas_edgelist(G, 'from', 'to')
-#         to = edges['to'].tolist()
-#         fr = edges['from'].tolist()
-#         fr = list(set(fr))
-#         to = list(set(to))
-#         to.extend(fr)
-#         nodes = list(set(to))
-#         nodes = pd.DataFrame(nodes)
-#         nodes.columns = ['x', 'y']
-#         nodes['xy'] = nodes.apply(lambda z: (z.x, z.y), axis=1)
-#
-#         # Assigning node ids to to_node and from_node
-#
-#         nodes['id'] = nodes.index
-#         edges['to_node'] = edges['to'].map(nodes.set_index('xy').id)
-#         edges['from_node'] = edges['from'].map(nodes.set_index('xy').id)
-#
-#         # creating pandana network
-#
-#         transit_ped_net = pdna.Network(nodes["x"],
-#                                        nodes["y"],
-#                                        edges["from_node"],
-#                                        edges["to_node"],
-#                                        pd.DataFrame([edges['length']]).T,
-#                                        twoway=True)
-#         transit_ped_net.save_hdf5(save_path)
-#     else:
-#         transit_ped_net = pdna.Network.from_hdf5(save_path)
-#     return transit_ped_net
-
 def get_pandana_net(G,save_path):
-    ''' convert a networkx graph to pandana graph'''
+    ''' convert a network graph to pandana graph'''
 
     if not os.path.exists(save_path):
-
         all_nodes = list(G.nodes)
         all_edges_dist = nx.get_edge_attributes(G, 'length')
         from_list = [all_nodes.index(node1) for (node1, node2) in list(all_edges_dist.keys())]
@@ -152,8 +76,8 @@ def get_pandana_net(G,save_path):
         nodes_x = [x for (x,y) in all_nodes]
         nodes_y = [y for (x, y) in all_nodes]
 
-        transit_ped_net = pdna.Network((nodes_x), (nodes_y), (from_list),
-                     (to_list),
+        transit_ped_net = pdna.Network(nodes_x, nodes_y, from_list,
+                     to_list,
                      pd.DataFrame(list(all_edges_dist.values())),
                      twoway=True)
     else:
@@ -161,19 +85,15 @@ def get_pandana_net(G,save_path):
 
     return transit_ped_net
 
-
 def pednet_CTs(pednet,CTs,mapping=os.path.join(preprocessing_folder,'pednet_points/road_CT_mapping.txt')):
     with open(mapping, 'r') as f:
         D = json.load(f)
 
     df_road=pd.DataFrame.from_dict(D)
-
     df_road=df_road[df_road["CTNAME"].isin(CTs)]
     pednet_ct = pednet[pednet['OBJECTID'].isin(list(df_road["roadID"].values))]
 
-    pednet_ct=pednet_ct.reset_index()
-
-    return pednet_ct
+    return pednet_ct.reset_index()
 
 def pednet_NIA(pednet,nia,preprocessing_folder):
     mapping=os.path.join(preprocessing_folder,"road_nia_mapping.txt")
@@ -182,9 +102,8 @@ def pednet_NIA(pednet,nia,preprocessing_folder):
     df_road=pd.DataFrame.from_dict(D)
     df_road = df_road[df_road["niaID"]==nia]
     pednet_nia = pednet[pednet['OBJECTID'].isin(list(df_road["roadID"].values))]
-    pednet_nia=pednet_nia.reset_index()
 
-    return pednet_nia
+    return pednet_nia.reset_index()
 
 def nodes_census(pednet,ct,mapping=os.path.join(preprocessing_folder,'pednet_points/road_CT_mapping.txt')):
     with open(mapping, 'r') as f:
@@ -201,25 +120,14 @@ def nodes_census(pednet,ct,mapping=os.path.join(preprocessing_folder,'pednet_poi
             roads_ct.append(roadID[i])
             nodes_ct.append(Point(x_p[i], y_p[i]))
     # simplification: take one end of the road as nodes
-    nodes_ct = nodes_ct[::2]
-    #pednet_ct = pednet[pednet['OBJECTID'].isin(roads_ct)]
-    #nodes_ct_df = pd.DataFrame(nodes_ct, columns=['geometry'])
-    #nodes_ct_df_g = gpd.GeoDataFrame(nodes_ct_df)
-    #print(len(nodes_ct))
-    #ax_2 = pednet_ct.plot(figsize=(15, 15), color='blue', markersize=1)
-    #nodes_ct_df_g.plot(ax=ax_2, color='red')
-    #plt.show()
-    return nodes_ct
+    return nodes_ct[::2]
 
 def nodes_from_pandana_net(transit_ped_net):
     nodes_df = transit_ped_net.nodes_df
-    gdf = gpd.GeoDataFrame(
-        nodes_df, geometry=gpd.points_from_xy(nodes_df.x, nodes_df.y))
-    #return gdf, nodes_df.x, nodes_df.y
+    gdf = gpd.GeoDataFrame(nodes_df, geometry=gpd.points_from_xy(nodes_df.x, nodes_df.y), crs="EPSG:2019")
     return gdf
 
 def nearest_panana_net(item, nodes):
-
     pts=nodes.geometry.unary_union
 
     if isinstance(item, shapely.geometry.polygon.Polygon):
@@ -254,22 +162,8 @@ def get_SP(transit_ped_net,save_path):
 
 if __name__ == "__main__":
     # creating network graph
-
-    pednet = gpd.read_file(file_path = "C:\\Users\\ASUS\\AAAI23-WalkabilityOptimization\\pednet.zip")
-
-    # pednet.head(2)
-    print(pednet.crs)
-    crs = {'init': 'epsg:4326'}
-    pednet = gpd.GeoDataFrame(pednet, crs=crs, geometry='geometry')
-    pednet = pednet.to_crs({'init': 'epsg:2019'})
-    #pednet = pednet[
-    #    ['OBJECTID', 'road_type', 'sdwlk_code', 'sdwlk_desc', 'crosswalk', 'cwalk_type', 'px', 'px_type', 'geometry']]
-
-    #CT='0363.07'
-    #pednet_ct=pednet_census(pednet,CT)
-
-    #G = create_graph(pednet_ct,precision=2)
-    #G2=create_graph(pednet)
-    #transit_ped_net=creat_pandana_net(G,name=CT)
+    pednet = gpd.read_file(file_path = "C:\\Users\\annve\\Downloads\\Walkability For All\\pednet.zip").to_crs("EPSG:2019")
+    print("PedNet CRS:", pednet.crs)
+   
 
 

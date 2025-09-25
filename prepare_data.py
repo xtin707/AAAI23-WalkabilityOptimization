@@ -40,7 +40,7 @@ def nia_preprocessing(nia_id):
     "amenity": "marketplace",
     "landuse": "retail"}
     tag_cafe= {"amenity":"cafe", "cuisine":"coffee_shop"}
-    tag_healthcare= {"amenity":["clinic", "hospital", "pharmacy"]}
+    tag_healthcare= {"amenity":["clinic", "hospital", "pharmacy", "doctors"]}
     pednet = load_pednet(data_root)
 
 
@@ -81,7 +81,7 @@ def nia_preprocessing(nia_id):
 
     all_dfs=[residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df, healthcare_df]
     all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe','restaurant', 'healthcare']
-    colors = ['g','lightcoral','grey','red','yellow','brown','orange','green']
+    colors = ['g','lightcoral','grey','red','yellow','brown','orange','violet']
 
     ax = pednet_nia.plot(figsize=(15, 15), color='blue', markersize=1)
 
