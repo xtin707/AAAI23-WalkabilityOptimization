@@ -13,7 +13,7 @@ amenity_weights_dict = { "grocery": [3],
 "shopping": [.5, .45, .4, .35, .3],
 "coffee": [1.25, .75],
 "banks": [1],
-"parks": [1], "schools": [1], "books": [1], "entertainment": [1]}
+"parks": [1], "schools": [1], "books": [1], "entertainment": [1], "healthcare": [1]}
 
 choice_weights_raw = np.array([.75, .45, .25, .25, .225, .225, .225, .225, .2, .2])  # for restaurant
 restaurant_sum = np.sum(choice_weights_raw)
@@ -234,7 +234,6 @@ def opt_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, 
     obj_value = obj.getValue()
 
     return obj_value, [np.mean(dist_grocery), np.mean(dist_restaurant), np.mean(dist_school)],   m.Runtime, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], m.status
-
 
 def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, k_array, threads, results_sava_path, bp, focus,EPS=0.5):
     '''multiple amenity case, with depth of choice'''
@@ -489,8 +488,6 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, SP_ma
 
     return obj_value, [np.mean(dist_grocery), restaurant_dist_obj, np.mean(dist_school)], m.Runtime, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], m.status
 
-
-
 def dist_to_score(d,L_a,L_f_a):
     a = copy.deepcopy(L_a[:-1])
     f_a = copy.deepcopy(L_f_a[:-1])
@@ -506,6 +503,129 @@ def dist_to_score(d,L_a,L_f_a):
     scores = np.piecewise(d, [d<a[1], (a[1]<=d) & (d<a[2]), (a[2]<=d) & (d<a[3]), d>=a[3]],
                  [lambda d: L_m[0]*d+L_c[0], lambda d: L_m[1]*d+L_c[1], lambda d: L_m[2]*d+L_c[2], lambda d:0])
     return scores
+
+def cur_assignment_single(df_from,amenity_df, SP_matrix,bp, focus,EPS=1.e-6):
+    ''' get assignment for the case with no allocation, no depth of choice'''
+
+    m = gp.Model('cur_assignment')
+    groups_from = df_from.groupby('node_ids').groups
+    group_values_from = list(groups_from.values())
+    num_residents = len(group_values_from)
+    num_amenity = len(amenity_df)
+    cartesian_prod = list(product(range(num_residents), range(num_amenity), ))  # a list of tuples
+    distances = {(i, j): SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[j]["node_ids"]] for i, j in cartesian_prod}
+
+    if len(amenity_df) == 0:
+        print("no existing amenities!")
+        return 0, None, None, None, None, num_residents, 0, None   # score_obj, obj_value, m.Runtime, m, assigned_D, num_residents, num_amenity, m.status
+
+
+    assign = m.addVars(cartesian_prod, vtype=GRB.BINARY, name='Assign')
+
+    # demand
+    m.addConstrs((gp.quicksum(assign[(i, j)] for j in range(num_amenity)) == 1 for i in range(num_residents)),
+                 name='Demand')
+    # objective
+    m.setObjective(assign.prod(distances)/num_residents, GRB.MINIMIZE)
+    m.optimize()
+
+    obj = m.getObjective()
+    obj_value = obj.getValue() # min total dist
+
+    assignments = [(i, j) for (i, j) in assign.keys() if (assign[i, j].x > EPS)]
+
+
+    assign_from_var_id = [i for (i, j) in assignments]
+    assign_to_var_id = [j for (i, j) in assignments]
+    assign_from_node_id = [df_from.iloc[group_values_from[i][0]]["node_ids"] for (i, j) in assignments]
+    assign_to_node_id = [amenity_df.iloc[j]["node_ids"] for (i, j) in assignments]
+
+    dist=[SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[j]["node_ids"]] for (i, j) in assignments]
+    scores = dist_to_score(np.array(dist), L_a, L_f_a)
+    score_obj = np.mean(scores)
+
+    assigned_D = {
+        "assign_from_var_id": assign_from_var_id,
+        "assign_to_var_id": assign_to_var_id,
+        "assign_from_node_id": assign_from_node_id,
+        "assign_to_node_id": assign_to_node_id,
+        "dist": dist}
+
+    return score_obj, obj_value, m.Runtime, m, assigned_D, num_residents, num_amenity, m.status
+
+def cur_assignment_single_depth(df_from,amenity_df, SP_matrix,bp, focus,EPS=1.e-6):
+    ''' get assignment for the case with no allocation, considering depth of choice'''
+
+    m = gp.Model('cur_assignment')
+    groups_from = df_from.groupby('node_ids').groups
+    group_values_from = list(groups_from.values())
+    num_residents = len(group_values_from)
+    num_amenity = len(amenity_df)
+
+    cartesian_prod = list(product(range(num_residents), range(num_amenity)))  # a list of tuples
+    cartesian_prod_assign = list(product(range(num_residents), range(num_amenity), range(len(choice_weights))))
+    distances = {(i, j): SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[j]["node_ids"]] for i, j in cartesian_prod}
+    x = m.addVars(cartesian_prod_assign, vtype=GRB.BINARY, name='Assign')
+
+    ## assign choices
+    tot_choices = min(num_amenity, len(choice_weights))
+    no_choices = list(range(tot_choices, len(choice_weights)))
+    m.addConstrs(
+        (gp.quicksum(x[(n, m, c)] for m in range(num_amenity)) == 1 for c in range(tot_choices) for n in range(num_residents)),
+        name='choices')
+    m.addConstrs((x[(n, m, c)] == 0 for c in no_choices for m in range(num_amenity) for n in range(num_residents)),
+        name='no choices')
+
+    # choices can not be the same place
+    ## currently existing
+    m.addConstrs(((gp.quicksum(x[(n, m, c)] for c in range(tot_choices)) <= 1) for m in range(num_amenity) for n in range(num_residents)), name='choices')
+    # objective
+    no_choice_sum =sum([choice_weights[c]*L_a[-2] for c in no_choices])
+    m.setObjective((gp.quicksum(
+        (gp.quicksum(
+                     choice_weights[c]*(gp.quicksum(distances[(n, m)] * x[(n, m, c)] for m in range(num_amenity)))
+                     for c in range(tot_choices))+no_choice_sum)
+                    for n in range(num_residents))/num_residents), GRB.MINIMIZE)
+    m.optimize()
+
+    obj = m.getObjective()
+    obj_value = obj.getValue() # min total dist
+
+    assignments = [(i, j, c) for (i, j, c) in x.keys() if (x[i, j, c].x > EPS)]
+
+    assigned_D={}
+
+    choices_dist = []
+
+    for choice in range(tot_choices):
+
+        assign_from_var_id = [i for (i, j, c) in assignments if c==choice]
+        assign_to_var_id = [j for (i, j, c) in assignments if c==choice]
+        assign_from_node_id = [df_from.iloc[group_values_from[i][0]]["node_ids"] for (i, j, c) in assignments  if c==choice]
+        assign_to_node_id = [amenity_df.iloc[j]["node_ids"] for (i, j, c) in assignments  if c==choice]
+        dist = [SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[j]["node_ids"]] for (i, j, c) in assignments if c==choice]
+        choices_dist.append(dist)
+
+        assigned_D[str(choice)+"_assign_from_var_id"]=assign_from_var_id
+        assigned_D[str(choice)+"_assign_to_var_id"]=assign_to_var_id
+        assigned_D[str(choice)+"_assign_from_node_id"]=assign_from_node_id
+        assigned_D[str(choice)+"_assign_to_node_id"]=assign_to_node_id
+        assigned_D[str(choice)+"_dist"]=dist
+
+    for choice in range(tot_choices, len(choice_weights)):
+        choices_dist.append([L_a[-2]]*num_residents)
+
+    obj = m.getObjective()
+    obj_value = obj.getValue()
+    dist_obj = [np.mean(assigned_D[str(c)+"_dist"]) if (str(c) + "_dist") in assigned_D.keys() else 0 for c in
+                range(len(choice_weights))]
+
+    choices_dist = np.array(choices_dist)
+    weighted_choices = np.dot(np.array(choice_weights),  choices_dist)
+    scores = dist_to_score(np.array(weighted_choices), L_a, L_f_a)
+    score_obj = np.mean(scores)
+
+    return score_obj, dist_obj, m.Runtime, m, assigned_D, num_residents, num_amenity, m.status
 
 
 

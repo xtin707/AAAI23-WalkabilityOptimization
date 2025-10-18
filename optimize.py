@@ -1,6 +1,6 @@
 from graph_utils import *
 from map_utils import *
-from model_latest import  opt_multiple, weights_array, dist_to_score, L_a, L_f_a, opt_multiple_depth, weights_array_multi, choice_weights
+from model_latest import *
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import argparse
@@ -171,17 +171,14 @@ if __name__ == "__main__":
             if args.k_array != '0,0,0':
                 k_array = [int(x) for x in args.k_array.split(',')]
                 log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s.txt" % (nia_id, args.k_array))
-                if not 'CP' in args.model:
-                    if not 'Greedy' in args.model:
-                        score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status\
-                            = opt_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array,threads, log_file_name,args.bp, args.focus, EPS = 0.5)
-                    else:
-                        score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
-                            = greedy_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array)
+                
+                if not 'Greedy' in args.model:
+                    score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status\
+                        = opt_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array,threads, log_file_name,args.bp, args.focus, EPS = 0.5)
                 else:
                     score_obj, [dist_grocery, dist_restaurant, dist_school], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], status \
-                        = opt_multiple_depth_CP(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array, threads, log_file_name, solver_path, args.bp, EPS=0.5)
-            else:
+                        = greedy_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D, k_array)
+            
                 multiple_dist = []
                 # grocery
                 score_obj, dist_grocery, solving_time, m, assigned_D, num_residents, num_cur_grocery, status = cur_assignment_single(residentials_df, grocery_df, D, args.bp, args.focus, EPS=0.5)
@@ -217,28 +214,11 @@ if __name__ == "__main__":
 
                 assigned_D = get_nearest(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D)
 
-
-        else:
-            print("choose model name")
-
         # save allocated results for mapping
-        if args.model in ['OptSingle','OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
-
-            if args.k:
-                k_name = args.k
-                allocated_f_name = os.path.join(sol_folder,"allocation_NIA_%s_%s_%s.csv" % (nia_id, k_name, args.amenity))
-                pd.DataFrame.from_dict(allocated_D).to_csv(allocated_f_name)
-            else:
-                k_name = 0
-
-            assigned_f_name = os.path.join(sol_folder, "assignment_NIA_%s_%s_%s.csv" % (nia_id, k_name, args.amenity))
-            model_f_name = os.path.join(sol_folder, "NIA_%s_%s_%s.sol" % (nia_id, k_name, args.amenity))
-        elif args.model in ['OptMultiple','OptMultipleDepth','OptMultipleCP','GreedyMultipleDepth','OptMultipleDepthCP', 'GreedyMultiple','GreedyMultipleLazy']:
+        if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultipleDepth', 'GreedyMultiple','GreedyMultipleLazy']:
             if args.k_array != '0,0,0':
                 k_name = args.k_array
-                #allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s.csv" % (nia_id, k_name))
                 allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s.pkl" % (nia_id, k_name))
-                #pd.DataFrame.from_dict(allocated_D).to_csv(allocated_f_name)
                 with open(allocated_f_name, 'wb') as f:
                     pickle.dump(allocated_D, f)
             else:
@@ -251,11 +231,6 @@ if __name__ == "__main__":
             pd.DataFrame.from_dict(assigned_D).to_csv(assigned_f_name)
         if m:
             m.write(model_f_name)
-
-        # write log
-        # text_file = open(os.path.join(log_folder, args.model + '_' + str(nia_id) + '.txt'), "w")
-        # text_file.write(log)
-        # text_file.close()
 
         print("D_NIA keys:", list(D_NIA.keys()))  # Print all available keys in D_NIA
         print("Attempting to access nia_id:", nia_id)  # Print the nia_id value before accessing
@@ -272,17 +247,8 @@ if __name__ == "__main__":
         # save summary
         nia_id_L.append(nia_id)
 
-        if args.model in ['OptSingle', 'OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
-            dist_obj_L.append(dist_obj)
-            num_existing_L.append(num_existing)
-            if args.k:
-                k_L.append(args.k)
-                num_allocations_L.append(num_allocation)
-            else:
-                k_L.append(0)
-                num_allocations_L.append(None)
 
-        elif args.model in ['OptMultiple', 'OptMultipleDepth', 'OptMultipleCP', 'GreedyMultipleDepth','OptMultipleDepthCP', 'GreedyMultiple','GreedyMultipleLazy']:
+        if args.model in ['OptMultiple', 'OptMultipleDepth', 'GreedyMultipleDepth', 'GreedyMultiple','GreedyMultipleLazy']:
             num_existing_L_grocery.append(num_cur_grocery)
             num_existing_L_restaurant.append(num_cur_restaurant)
             num_existing_L_school.append(num_cur_school)
@@ -306,62 +272,10 @@ if __name__ == "__main__":
         num_residents_L.append(num_residents)
         status_L.append(status)
 
-        # plot
-        if args.k:
-            ax = pednet_nia.plot(figsize=(15, 15), color='blue', markersize=1)
-            res = residentials_df.plot(ax=ax,color='green', markersize=80, label='Residential location')
-            parking = parking_df.plot(ax=ax,color='gray', markersize=80, label='Parking lot') #,fontsize=20
-            if args.amenity:
-                if len(amenity_df)>0:
-                    amenity_df.plot(ax=ax, color=colors[all_strs.index(args.amenity)], markersize=120, label='Existing')
-
-            allocated_df = parking_df.iloc[allocated_D["allocate_row_id"]]
-            allocated_df.plot(ax=ax, color='fuchsia', markersize=80, label='Allocated amenity')
-
-            pink_patch = mpatches.Patch(color='fuchsia', label='Allocated amenity')
-            green_patch = mpatches.Patch(color='green', label='Residential location')
-            gray_patch = mpatches.Patch(color='gray', label='Parking lot')
-
-            if len(amenity_df)>0:
-                    last_patch = mpatches.Patch(color=colors[all_strs.index(args.amenity)], label='Existing amenity')
-
-            if (len(amenity_df)>0):
-                    plt.legend(handles=[pink_patch,green_patch,gray_patch,last_patch])
-            else:
-                plt.legend(handles=[pink_patch,green_patch,gray_patch])
-
-
-            plt.title("neighbourhood: %s" % (D_NIA[nia_id]['name']))
-            if args.k:
-                fig_name = "nia_%s_%s_allocation_%s.png" % (nia_id, args.k, args.amenity)
-            else:
-                fig_name = "nia_%s_%s_allocation_%s.png" % (nia_id, 0, args.amenity)
-
-
-            print("Saving figure to:", os.path.join(visual_folder, fig_name))
-            plt.savefig(os.path.join(visual_folder, fig_name))
-            print("Figure saved.")
-
-            plt.savefig(os.path.join(visual_folder,fig_name))
-
         # save results summary
         os.makedirs(summary_folder, exist_ok=True)
-        if args.model in ['OptSingle', 'OptSingleDepth','OptSingleCP','OptSingleDepthCP','GreedySingle','GreedySingleDepth']:
-            results_D = {
-                "nia_id": nia_id_L,
-                "nia_name": nia_name_L,
-                "k": k_L,
-                "obj": obj_L,
-                "dist_obj": dist_obj_L,
-                "solving_time": solving_time_L,
-                "num_res": num_residents_L,
-                "num_parking": num_allocations_L,
-                "num_cur": num_existing_L,
-                "model_status": status_L
-            }
-            summary_df_filename = os.path.join(summary_folder, "NIA_%s_%s_%s.csv" % (nia_id, k_name, args.amenity))
 
-        elif args.model in ['OptMultiple', 'OptMultipleDepth','OptMultipleCP','GreedyMultipleDepth','OptMultipleDepthCP', 'GreedyMultiple','GreedyMultipleLazy']:
+        if args.model in ['OptMultiple', 'OptMultipleDepth','OptMultipleCP','GreedyMultipleDepth','OptMultipleDepthCP', 'GreedyMultiple','GreedyMultipleLazy']:
             results_D = {
                 "nia_id": nia_id_L,
                 "nia_name": nia_name_L,

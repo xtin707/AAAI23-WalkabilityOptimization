@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-MODEL_NAME = "GOptMultipleDepth"
+MODEL_NAME = "OptMultipleDepth"
 
 NIA_IDS = [ #31 NIAs
     2, 3, 6, 21, 22, 24, 25, 154, 155, 27, 28, 43, 44, 55, 61, 72, 85, 91, 110, 
@@ -10,7 +10,8 @@ NIA_IDS = [ #31 NIAs
 
 # Define different k value combinations you want to test
 k_values_list = [
-    # [0, 0, 0],[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5],
+    # [0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5],
+    [0, 0, 0], [3, 3, 3]
 ]
 
 # Loop through all NIA_ID values and k value sets
@@ -20,7 +21,7 @@ for NIA_ID in NIA_IDS:
         
         command = [
             "python", "optimize.py", MODEL_NAME, str(NIA_ID),
-            "--k_array", f"{k_grocery},{k_restaurant},{k_school}"
+            "--k_array", f"{k_grocery},{k_restaurant},{k_school},{k_healthcare}"
         ]
         command = list(map(str, command))  # Ensure all elements are strings
 
