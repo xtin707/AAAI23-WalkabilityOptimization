@@ -8,25 +8,29 @@ from docplex.cp.model import *
 import copy
 from map_utils import map_back_allocate, map_back_assign
 
-amenity_weights_dict = { "grocery": [3],
+
+#note: change weights prioritizing the needs of elderly 
+amenity_weights_dict = { "grocery": [2],
 "restaurants": [.75, .45, .25, .25, .225, .225, .225, .225, .2, .2],
 "shopping": [.5, .45, .4, .35, .3],
 "coffee": [1.25, .75],
 "banks": [1],
-"parks": [1], "schools": [1], "books": [1], "entertainment": [1], "healthcare": [1]}
+"parks": [1], "schools": [1], "books": [1], "entertainment": [1], "healthcare": [3]}
 
 choice_weights_raw = np.array([.75, .45, .25, .25, .225, .225, .225, .225, .2, .2])  # for restaurant
 restaurant_sum = np.sum(choice_weights_raw)
 choice_weights = choice_weights_raw / restaurant_sum  # for restaurant
 
-L_a=[0,400,1800,2400,5000000]
+
+L_a=[0,300,500,800,2400]
+#L_a=[0,400,1800,2400,5000000]
 L_f_a=[100,95,10,0,0]
 weights_array = np.array([3,restaurant_sum,1]) / (restaurant_sum+3+1) # grocery, restaurant, school (temp)
 weights_array_multi = np.array([3, .75, .45, .25, .25, .225, .225, .225, .225, .2, .2, 1]) / (restaurant_sum+3+1)
 w_choice_multi_amenity = choice_weights_raw / (restaurant_sum+3+1)
 time_limit=5*60*60 # 5h time limit
 
-def opt_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, k_array, threads,results_sava_path,bp, focus,EPS=0.5):
+def opt_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_df, SP_matrix, k_array, threads,results_sava_path,bp, focus,EPS=0.5):
     '''multiple amenity case, no depth of choice'''
 
     if len(df_from)>0:
@@ -235,7 +239,7 @@ def opt_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, 
 
     return obj_value, [np.mean(dist_grocery), np.mean(dist_restaurant), np.mean(dist_school)],   m.Runtime, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], m.status
 
-def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, k_array, threads, results_sava_path, bp, focus,EPS=0.5):
+def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_df, SP_matrix, k_array, threads, results_sava_path, bp, focus,EPS=0.5):
     '''multiple amenity case, with depth of choice'''
 
     if len(df_from)>0:
@@ -501,7 +505,7 @@ def dist_to_score(d,L_a,L_f_a):
         L_m.append(m)
         L_c.append(c)
     scores = np.piecewise(d, [d<a[1], (a[1]<=d) & (d<a[2]), (a[2]<=d) & (d<a[3]), d>=a[3]],
-                 [lambda d: L_m[0]*d+L_c[0], lambda d: L_m[1]*d+L_c[1], lambda d: L_m[2]*d+L_c[2], lambda d:0])
+        [lambda d: L_m[0]*d+L_c[0], lambda d: L_m[1]*d+L_c[1], lambda d: L_m[2]*d+L_c[2], lambda d:0])
     return scores
 
 def cur_assignment_single(df_from,amenity_df, SP_matrix,bp, focus,EPS=1.e-6):
