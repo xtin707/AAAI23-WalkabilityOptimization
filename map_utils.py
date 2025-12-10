@@ -193,10 +193,10 @@ def ct_nia_mapping(nia_path):
     df = pd.read_excel(nia_path)
     D={}
     for i in range(len(df)):
-        id = int(df.iloc[i][0])
-        ct = str(df.iloc[i][2])
+        id = int(df.iloc[i,0])
+        ct = str(df.iloc[i,2])
         if not id in D.keys():
-            D[id]={"name":df.iloc[i][1],"CTs":[ct[-6:-2]+'.'+ct[-2:]]}
+            D[id]={"name":df.iloc[i,1],"CTs":[ct[-6:-2]+'.'+ct[-2:]]}
         else:
             D[id]["CTs"].append(ct[-6:-2]+'.'+ct[-2:])
     return D

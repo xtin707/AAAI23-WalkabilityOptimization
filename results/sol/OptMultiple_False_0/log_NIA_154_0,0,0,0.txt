@@ -1,0 +1,59 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec  9 02:34:20 2025
+
+Set parameter LogFile to value "results\sol\OptMultiple_False_0\log_NIA_154_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 18 threads
+
+Warning: Thread count (18) is larger than processor count (12)
+         Reduce the value of the Threads parameter to improve performance
+
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  18
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 106646 rows, 121608 columns and 451988 nonzeros
+Model fingerprint: 0xa02d0f37
+Model has 320 simple general constraints
+  320 PWL
+Variable types: 640 continuous, 120968 integer (120968 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+03]
+  Objective range  [3e-03, 3e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 8e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 104086 rows and 103388 columns
+Presolve time: 0.21s
+Presolved: 2560 rows, 18220 columns, 37720 nonzeros
+Presolved model has 320 SOS constraint(s)
+Variable types: 2560 continuous, 15660 integer (15660 binary)
+Performing another presolve...
+Presolve removed 2542 rows and 18173 columns
+Presolve time: 1.28s
+Found heuristic solution: objective 74.2807260
+
+Root relaxation: objective 7.434869e+01, 8 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   74.34869    0    5   74.28073   74.34869  0.09%     -    1s
+     0     0          -    0        74.28073   74.28073  0.00%     -    1s
+
+Explored 1 nodes (10 simplex iterations) in 1.71 seconds (0.22 work units)
+Thread count was 18 (of 12 available processors)
+
+Solution count 1: 74.2807 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.428072600432e+01, best bound 7.428072943263e+01, gap 0.0000%

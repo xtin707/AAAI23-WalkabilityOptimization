@@ -16,8 +16,6 @@ import sys
 parser = argparse.ArgumentParser(description='Enter model name:grb_PWL,scratch')
 parser.add_argument("model", help="model", type=str)
 parser.add_argument("nias", help="nias to run", type=str)
-parser.add_argument("--amenity", help="amenity (not used now for single-amenity)", type=str)
-parser.add_argument("--k", help="upper bound (not used for single-amenity)", type=int)
 parser.add_argument("--k_array", help="upper bound", type=str)
 parser.add_argument("--bp", help="whether to set branching priority", default=False,type=lambda x: (str(x).lower() == 'true'))
 parser.add_argument("--focus", help="MIPFocus parameter", default=0,type=int)
@@ -28,10 +26,10 @@ print("Received arguments:", sys.argv)
 if unknown:
     print("Ignoring unknown arguments:", unknown)
 
-data_root = r"C:\Users\annve\Downloads\AAAI23-WalkabilityOptimization"
+data_root = r"C:\Users\annve\Downloads\Walkability For All"
 preprocessing_folder = "./preprocessing"
 threads = 18
-solver_path = None  # CP removed so solver_path not required
+
 
 file_path = os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx")
 df = pd.read_excel(file_path)
@@ -87,8 +85,8 @@ if __name__ == "__main__":
             transit_ped_net = get_pandana_net(G, os.path.join(net_save_path, net_filename))
 
         # load dfs
-        all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant']
-        colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange']
+        all_strs = ['residential', 'department_store', 'parking', 'grocery', 'school', 'cafe', 'restaurant','healthcare']
+        colors = ['g', 'lightcoral', 'grey', 'red', 'yellow', 'brown', 'orange', 'blue']
         df_filenames = ["NIA_%s_%s.pkl" % (nia_id, s) for s in all_strs]
         all_dfs = [pd.read_pickle(os.path.join(df_save_path, df_filename)) for df_filename in df_filenames]
         residentials_df, department_store_df, parking_df, grocery_df, school_df, cafe_df, restaurant_df, healthcare_df = all_dfs
@@ -240,16 +238,19 @@ if __name__ == "__main__":
             "k_grocery": k_L_grocery,
             "k_restaurant": k_L_restaurant,
             "k_school": k_L_school,
+            "k_healthcare": k_L_healthcare,
             "obj": obj_L,
             "dist_obj_grocery": dist_obj_L_grocery,
             "dist_obj_restaurant": dist_obj_L_restaurant,
             "dist_obj_school": dist_obj_L_school,
+            "dist_obj_healthcare": dist_obj_L_healthcare,
             "solving_time": solving_time_L,
             "num_res": num_residents_L,
             "num_parking": num_allocations_L,
             "num_cur_grocery": num_existing_L_grocery,
             "num_cur_restaurant": num_existing_L_restaurant,
             "num_cur_school": num_existing_L_school,
+            "num_cur_healthcare": num_existing_L_healthcare,
             "model_status": status_L
         }
         summary_df_filename = os.path.join(summary_folder, "NIA_%s_%s_summary.csv" % (nia_id, model_save_name))

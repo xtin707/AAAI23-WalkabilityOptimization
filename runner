@@ -1,23 +1,23 @@
 import subprocess
-import os
 
-MODEL_NAME = "OptMultipleDepth"
 
-NIA_IDS = [ #31 NIAs
-    2, 3, 6, 21, 22, 24, 25, 154, 155, 27, 28, 43, 44, 55, 61, 72, 85, 91, 110, 
-    111, 112, 113, 115, 124, 125, 135, 136, 141, 142, 138, 139 
+MODEL_NAME = "OptMultiple"
+
+NIA_IDS = [ #31 NIAs, missing NIAs: 5 and 121  6, 2 , 
+    2, 21, 22, 24, 25, 154, 155, 27, 28, 43, 44, 55, 61, 72, 85, 91, 110, 111, 112, 113, 115, 124, 125, 135, 136, 141, 142, 138, 139 
 ]
 
 # Define different k value combinations you want to test
 k_values_list = [
-    # [0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5],
-    [0, 0, 0], [3, 3, 3]
+    # [0, 0, 0], , [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5]
+    [1, 1, 1, 1]
+    
 ]
 
 # Loop through all NIA_ID values and k value sets
 for NIA_ID in NIA_IDS:
     for k_values in k_values_list:
-        k_grocery, k_restaurant, k_school = k_values
+        k_grocery, k_restaurant, k_school, k_healthcare = k_values
         
         command = [
             "python", "optimize.py", MODEL_NAME, str(NIA_ID),
@@ -37,20 +37,18 @@ import os
 # Fore model  name choose
 #    * OptMultipleDepth
 #    * OptMultiple
-#    * OptMultipleDepthCP
-#    * OptMultipleCP
 #    * GreedyMultipleDepth
 #    * GreedyMultiple
 
 MODEL_NAME = "GreedyMultipleDepth"
 
 #existing data_OPTMUL:  2, 25,  27, 55, 85, 113, 112, 124, 141, 155, 154
-#existing data_OPTMULCP:  2, 25,  27, 55, 85, 113, 112, 124
 #existing data_GRDYMUL:  25,  27, 55, 85, 113, 112, 124, 155, 154, 142, 141, 121
 
 NIA_IDS = [
   2, 3, 6, 21, 22, 24, 25, 154, 155, 27, 28, 43, 44, 55, 61, 72, 85, 91, 110, 
 111, 112, 113, 115, 124, 125, 135, 136, 141, 142, 138, 139 
+
 ]
 
 # For k values choose from 1-3 
