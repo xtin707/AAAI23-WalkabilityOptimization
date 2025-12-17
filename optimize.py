@@ -28,7 +28,8 @@ if unknown:
 
 data_root = r"C:\Users\annve\Downloads\Walkability For All"
 preprocessing_folder = "./preprocessing"
-threads = 18
+#Thread count (18) is larger than processor count (12) Reduce the value of the Threads parameter to improve performance
+threads = 12 
 
 
 file_path = os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx")

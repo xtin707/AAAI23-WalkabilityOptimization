@@ -127,7 +127,7 @@ def opt_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_
 
     m.optimize()
 
-    allocations = [(j, a) for (j, a) in y.keys() if (y[(j, a)].x) > EPS]
+    allocations = [(j, a) for (j, a) in y.keys() if (y[(j, a)].X) > EPS]
 
     # save allocation solutions
     allocate_var_id_grocery = [(j, a) for (j, a) in allocations if a==0]
@@ -347,7 +347,7 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healt
                 d[(i, cur_id)] = SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[inst_row]["node_ids"]]
             start_id += len(amenity_df)
 
-    x = m.addVars(cartesian_prod_assign_grocery + cartesian_prod_assign_school, vtype=GRB.BINARY, name='assign')
+    x = m.addVars(cartesian_prod_assign_grocery + cartesian_prod_assign_school + cartesian_prod_assign_healthcare, vtype=GRB.BINARY, name='assign')
     x_choice = m.addVars(cartesian_prod_assign_restaurant, vtype=GRB.BINARY, name='assign')
     y = m.addVars(list(product(range(num_allocation), range(len(k_array)))), vtype=GRB.INTEGER, name='activate')
     l = m.addVars(num_residents, vtype=GRB.CONTINUOUS, name='dist')
@@ -377,12 +377,12 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healt
         
     # assgined to one instance of amenity
     m.addConstrs((gp.quicksum(x[(i, j, 0)] for j in range_grocery_dest_list) == 1 for i in range(num_residents)), name='grocery demand')
-    #m.addConstrs((gp.quicksum(x[(i, j, 1)] for j in range_restaurant_dest_list) == 1 for i in range(num_residents)), name='restaurant demand')
     m.addConstrs((gp.quicksum(x[(i, j, 2)] for j in range_school_dest_list) == 1 for i in range(num_residents)), name='school demand')
     m.addConstrs((gp.quicksum(x[(i, j, 3)] for j in range_healthcare_dest_list) == 1 for i in range(num_residents)), name='healthcare demand')
-    
-    # assign choices
+    # assign choices for restaurant
     m.addConstrs(((gp.quicksum(x_choice[(i, j, 1, c)] for j in range_restaurant_dest_list) == 1) for c in range(tot_choices) for i in range(num_residents)), name='choices')
+    
+    
     # resource constraint
     m.addConstrs(((gp.quicksum(y[(j,a)] for a in range(len(weights_array))) <= capacity[j]) for j in range(num_allocation)), name='capacity')
     # activation
@@ -407,7 +407,7 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healt
 
     m.optimize()
 
-    allocations = [(j, a) for (j, a) in y.keys() if (y[(j, a)].x) > EPS]
+    allocations = [(j, a) for (j, a) in y.keys() if (y[(j, a)].X) > EPS]
 
     # save allocation solutions
     # grocery
@@ -473,12 +473,10 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healt
     }
 
     # assignments
-
     assignments = [(i, j, a) for (i, j, a) in x.keys() if (x[(i, j, a)].x > EPS)]
     choice_assignments = [(i,j,a,c) for (i,j,a,c) in x_choice.keys() if (x_choice[(i,j,a,c)].x > EPS)]
 
     # grocery
-
     assign_from_var_id_grocery = [i for (i, j, a) in assignments if a==0]
     assign_to_var_id_grocery = [j for (i, j, a) in assignments if a==0]
     assign_from_node_id_grocery = [df_from.iloc[group_values_from[i][0]]["node_ids"] for (i, j, a) in assignments if a==0]
@@ -487,7 +485,6 @@ def opt_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, healt
     dist_grocery =[]
 
     # school
-
     assign_from_var_id_school = [i for (i, j, a) in assignments if a == 0]
     assign_to_var_id_school = [j for (i, j, a) in assignments if a == 0]
     assign_from_node_id_school = [df_from.iloc[group_values_from[i][0]]["node_ids"] for (i, j, a) in assignments if a == 2]

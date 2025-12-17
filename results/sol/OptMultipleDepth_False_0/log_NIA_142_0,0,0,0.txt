@@ -1,0 +1,58 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec 16 20:55:12 2025
+
+Set parameter LogFile to value "results\sol\OptMultipleDepth_False_0\log_NIA_142_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  12
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 455785 rows, 533724 columns and 2331995 nonzeros
+Model fingerprint: 0x354b8227
+Model has 420 simple general constraints
+  420 PWL
+Variable types: 840 continuous, 532884 integer (532560 binary)
+Coefficient statistics:
+  Matrix range     [1e-01, 2e+03]
+  Objective range  [2e-03, 2e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 6e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 441085 rows and 406087 columns
+Presolve time: 0.63s
+Presolved: 14700 rows, 127637 columns, 332464 nonzeros
+Presolved model has 420 SOS constraint(s)
+Variable types: 3360 continuous, 124277 integer (124277 binary)
+Performing another presolve...
+Presolve removed 14655 rows and 127340 columns
+Presolve time: 3.37s
+
+Root relaxation: objective 7.426558e+01, 68 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   74.26558    0    5          -   74.26558      -     -    4s
+     0     0   74.23397    0    4          -   74.23397      -     -    4s
+H    0     0                      74.2038930   74.23397  0.04%     -    4s
+     0     0          -    0        74.20389   74.20418  0.00%     -    4s
+
+Explored 1 nodes (71 simplex iterations) in 4.40 seconds (2.03 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: 74.2039 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (7.3787e-06) exceeds tolerance
+Warning: max general constraint violation (1.1990e-06) exceeds tolerance
+Best objective 7.420389302498e+01, best bound 7.420418286695e+01, gap 0.0004%
