@@ -4,12 +4,12 @@ import subprocess
 MODEL_NAME = "OptMultipleDepth"
 
 NIA_IDS = [ #31 NIAs, missing NIAs: 5 and 121  6, 21, 24,, 155, 27, 28, 43, 44, 55, 61, 72, 85, 91, 110, 111, 112, 113, 115, 124, 125, 135, 136, 141, 142, 138, 139, 22
-    110, 111, 112, 113, 115, 
+    136
 ]
 
 # Define different k value combinations you want to test
 k_values_list = [
-    # , [1, 1, 1, 1], [2, 2, 2, 2], , [4, 4, 4, 4], [5, 5, 5, 5]  [0, 0, 0, 0]
+    # , [1, 1, 1, 1], [2, 2, 2, 2], , [4, 4, 4, 4], [5, 5, 5, 5] [0, 0, 0, 0]
     [3, 3, 3, 3]
 
 ]
