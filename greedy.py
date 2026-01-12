@@ -251,9 +251,9 @@ def greedy_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, he
 
     return score_obj, [np.mean(d_grocery), list(np.mean(d_res,axis=0)), np.mean(d_school), np.mean(d_healthcare)], (et - st), None, allocated_D, None, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school, num_cur_healthcare], None
 
-# modifications are not implemented on greedy_multiple yet
-def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matrix, k_array):
-    '''multiple amenity case, with depth of choice'''
+
+def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_df, SP_matrix, k_array):
+    '''multiple amenity case, with no depth of choice'''
 
     if len(df_from)>0:
         df_from = df_from[['geometry', 'node_ids']]
@@ -275,6 +275,7 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
     num_cur_grocery = len(grocery_df)
     num_cur_restaurant = len(restaurant_df)
     num_cur_school = len(school_df)
+    num_cur_healthcare = len(healthcare_df)
 
     cur_index = num_allocation
     range_grocery_existing = list(range(cur_index, cur_index + num_cur_grocery))
@@ -285,14 +286,16 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
     cur_index += num_cur_restaurant
     range_school_existing = list(range(cur_index, cur_index + num_cur_school))
     range_school_dest_list = list(range(num_allocation)) + range_school_existing
-
+    cur_index += num_cur_school
+    range_healthcare_existing = list(range(cur_index, cur_index + num_cur_healthcare))
+    range_healthcare_dest_list = list(range(num_allocation)) + range_healthcare_existing
 
     # retrieve distances
     d = {(i, j): SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], df_to.iloc[group_values_to[j][0]]["node_ids"]] for i, j in list(product(range(num_residents), range(num_allocation)))}
 
     for i in range(num_residents):
         start_id = num_allocation
-        for amenity_df in [grocery_df, restaurant_df, school_df]:
+        for amenity_df in [grocery_df, restaurant_df, school_df, healthcare_df]:
             for inst_row in range(len(amenity_df)):
                 cur_id = start_id + inst_row
                 d[(i, cur_id)] = SP_matrix[df_from.iloc[group_values_from[i][0]]["node_ids"], amenity_df.iloc[inst_row]["node_ids"]]
@@ -307,6 +310,7 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
     mat_grocery = np.array([[d[(i, j)] for j in range_grocery_existing] for i in range(num_residents)])
     mat_res = np.array([[d[(i, j)] for j in range_restaurant_existing] for i in range(num_residents)])
     mat_school = np.array([[d[(i, j)] for j in range_school_existing] for i in range(num_residents)])
+    mat_healthcare = np.array([[d[(i, j)] for j in range_healthcare_existing] for i in range(num_residents)])
 
     if mat_grocery.shape[1]>0:
         d_grocery = np.amin(mat_grocery, axis=1)
@@ -320,39 +324,47 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
         d_school = np.amin(mat_school, axis=1)
     else:
         d_school = np.full((num_residents, ), L_a[-2])
+    if mat_healthcare.shape[1] > 0:
+        d_healthcare = np.amin(mat_healthcare, axis=1)
+    else:
+        d_healthcare = np.full((num_residents, ), L_a[-2])
 
-    multiple_dist = np.concatenate((d_grocery.reshape((1, num_residents)), d_res.reshape((1, num_residents)), d_school.reshape((1, num_residents))), axis=0)
+    multiple_dist = np.concatenate((d_grocery.reshape((1, num_residents)), d_res.reshape((1, num_residents)), d_school.reshape((1, num_residents)), d_healthcare.reshape((1, num_residents))), axis=0)
     weighted_dist = np.dot(np.array(weights_array), multiple_dist)
     scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
     score_obj = np.mean(scores)
 
-    L_amenity = ['grocery','restaurant','school']
+    L_amenity = ['grocery','restaurant','school', 'healthcare']
 
     # while loop
-    allocated_grocery, allocated_res, allocated_school = [], [], []
+    allocated_grocery, allocated_res, allocated_school, allocated_healthcare = [], [], [], []
     prev_score = score_obj
 
-    while (((len(allocated_grocery) < k_array[0]) or (len(allocated_res) < k_array[1]) or (len(allocated_school) < k_array[2])) and (max(capacity)>0)):
+    while (((len(allocated_grocery) < k_array[0]) or (len(allocated_res) < k_array[1]) or (len(allocated_school) < k_array[2]) or (len(allocated_healthcare) < k_array[3])) and (max(capacity)>0)):
         new_obj = np.zeros((len(k_array),num_allocation))
 
         for m in range(num_allocation):
             if capacity[m]>0:
-                allocated = [allocated_grocery, allocated_res, allocated_school]
+                allocated = [allocated_grocery, allocated_res, allocated_school, allocated_healthcare]
                 for a in range(len(L_amenity)):
                     if (len(allocated[a]) < k_array[a]):
                         L_grocery = range_grocery_existing + allocated_grocery
                         L_res = range_restaurant_existing + allocated_res
                         L_school = range_school_existing + allocated_school
+                        L_healthcare = range_healthcare_existing + allocated_healthcare
                         if a ==0:
                             L_grocery = L_grocery + [m]
                         if a==1:
                             L_res = L_res + [m]
                         if a==2:
                             L_school = L_school + [m]
+                        if a==3:
+                            L_healthcare = L_healthcare + [m]
 
                         mat_grocery = np.array([[d[(i, j)] for j in L_grocery] for i in range(num_residents)])
                         mat_res = np.array([[d[(i, j)] for j in L_res] for i in range(num_residents)])
                         mat_school = np.array([[d[(i, j)] for j in L_school] for i in range(num_residents)])
+                        mat_healthcare = np.array([[d[(i, j)] for j in L_healthcare] for i in range(num_residents)])
                         if mat_grocery.shape[1] > 0:
                             d_grocery = np.amin(mat_grocery, axis=1)
                         else:
@@ -365,8 +377,12 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
                             d_school = np.amin(mat_school, axis=1)
                         else:
                             d_school = np.full((num_residents,), L_a[-2])
+                        if mat_healthcare.shape[1] > 0:
+                            d_healthcare = np.amin(mat_healthcare, axis=1)
+                        else:
+                            d_healthcare = np.full((num_residents,), L_a[-2])
 
-                        multiple_dist = np.concatenate((d_grocery.reshape((1, num_residents)),d_res.reshape((1, num_residents)),d_school.reshape((1, num_residents))), axis=0)
+                        multiple_dist = np.concatenate((d_grocery.reshape((1, num_residents)),d_res.reshape((1, num_residents)),d_school.reshape((1, num_residents)),d_healthcare.reshape((1, num_residents))), axis=0)
                         weighted_dist = np.dot(np.array(weights_array), multiple_dist)
                         scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
                         score_obj = np.mean(scores)
@@ -382,6 +398,8 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
             allocated_res.append(loc_id)
         if type_id==2:
             allocated_school.append(loc_id)
+        if type_id==3:
+            allocated_healthcare.append(loc_id)
 
         capacity[loc_id] = capacity[loc_id] - 1
 
@@ -419,6 +437,15 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
         allocate_row_id_school.append(group_values_to[j][0])
         allocate_node_id_school.append(df_to.iloc[group_values_to[j][0]]["node_ids"])
 
+    # healthcare
+    allocate_var_id_healthcare = []
+    allocate_row_id_healthcare = []
+    allocate_node_id_healthcare = []
+    for j in allocated_healthcare:
+        allocate_var_id_healthcare.append(j)
+        allocate_row_id_healthcare.append(group_values_to[j][0])
+        allocate_node_id_healthcare.append(df_to.iloc[group_values_to[j][0]]["node_ids"])
+
     allocated_D = {
         "allocate_var_id_grocery": allocate_var_id_grocery,
         "allocate_node_id_grocery": allocate_node_id_grocery,
@@ -428,7 +455,10 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
         "allocate_row_id_restaurant": allocate_row_id_restaurant,
         "allocate_var_id_school": allocate_var_id_school,
         "allocate_row_id_school": allocate_row_id_school,
-        "allocate_node_id_school": allocate_node_id_school
+        "allocate_node_id_school": allocate_node_id_school,
+        "allocate_var_id_healthcare": allocate_var_id_healthcare,
+        "allocate_row_id_healthcare": allocate_row_id_healthcare,
+        "allocate_node_id_healthcare": allocate_node_id_healthcare
     }
 
     # assignments
@@ -436,12 +466,14 @@ def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, SP_matri
     mat_grocery = np.array([[d[(i, j)] for j in (range_grocery_existing + allocated_grocery)] for i in range(num_residents)])
     mat_res = np.array([[d[(i, j)] for j in (range_restaurant_existing + allocated_res)] for i in range(num_residents)])
     mat_school = np.array([[d[(i, j)] for j in (range_school_existing + allocated_school)] for i in range(num_residents)])
+    mat_healthcare = np.array([[d[(i, j)] for j in (range_healthcare_existing + allocated_healthcare)] for i in range(num_residents)])
 
     d_grocery = np.amin(mat_grocery, axis=1)
     d_res = np.amin(mat_res, axis=1)
     d_school = np.amin(mat_school, axis=1)
+    d_healthcare = np.amin(mat_healthcare, axis=1)
 
-    return score_obj, [np.mean(d_grocery), np.mean(d_res), np.mean(d_school)], (et - st), None, allocated_D, None, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school], None
+    return score_obj, [np.mean(d_grocery), np.mean(d_res), np.mean(d_school), np.mean(d_healthcare)], (et - st), None, allocated_D, None, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school, num_cur_healthcare], None
 
 def get_nearest(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_df, SP_matrix):
     '''multiple amenity case, with depth of choice'''
