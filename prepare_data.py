@@ -113,7 +113,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data_root = "C:\\Users\\annve\\Downloads\\Walkability For All"
+    #data_root = "C:\\Users\\annve\\Downloads\\Walkability For All"
+    data_root = r"C:\Users\HP\Documents\GitHub\AAAI23-WalkabilityOptimization"
     
 
     preprocessing_folder = "./preprocessing"

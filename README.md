@@ -15,7 +15,7 @@ To run optimization models:
     * OptMultiple: MILP, SingleChoice case
     * OptMultipleDepthCP: CP, MultiChoice case
     * OptMultipleCP: CP, SingleChoice case
-    * GreedyMultipleDepth: Greedy, MultiChoice case
+    * : Greedy, MultiChoice case
     * GreedyMultiple: Greedy, SingleChoice case
     
     

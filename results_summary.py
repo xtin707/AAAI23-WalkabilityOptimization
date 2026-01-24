@@ -1,7 +1,7 @@
 import glob
 import pandas as pd
 import os
-from map_utils import ct_nia_mapping,get_nias
+from map_utils import ct_nia_mapping, get_nias
 from graph_utils import pednet_NIA
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,7 @@ import json
 import geopandas as gpd
 import matplotlib.ticker as ticker 
 from matplotlib.ticker import MultipleLocator
-from model_latest import opt_single, cur_assignment_single, opt_multiple, opt_single_depth, cur_assignment_single_depth, weights_array, dist_to_score, L_a, L_f_a, weights_array_multi, choice_weights
+from model_latest import *
 
 def ensure_directory_exists(folder_path): 
     """Ensure that a directory exists. If a file path is given, create its parent directory."""
@@ -18,7 +18,6 @@ def ensure_directory_exists(folder_path):
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path, exist_ok=True)
-
     
 def shifted_geo_mean(L, s=1):
     a = np.array(L)
@@ -74,43 +73,6 @@ def plot_time_vs_size_multiple(results_folder, plot_folder, models, display_name
     ensure_directory_exists(os.path.dirname(save_path))
     plt.savefig(save_path)
     return
-
-def plot_time_vs_size_single(results_folder, plot_folder, models, display_names, save_name):
-    plt.clf()
-
-    for i in range(len(models)):
-
-        model_name = models[i]
-        display_name = display_names[i]
-
-        if "Depth" in model_name:
-            amenities = ["restaurant"]
-        else:
-            amenities = ["grocery","restaurant","school"]
-
-        for amenity in amenities:
-
-            results_df = get_results_df(results_folder, model_name, amenity)
-            results_df=results_df[results_df["k"]>0]
-            size = results_df.groupby("nia_id").mean()["num_res"] + results_df.groupby("nia_id").mean()["num_parking"]
-            avg_time = results_df.groupby("nia_id")["solving_time"].apply(shifted_geo_mean)
-            new_x, new_y = zip(*sorted(zip(size, avg_time)))
-
-            plt.plot(new_x, new_y, '--o', label=display_name + "-"+ amenity)
-            plt.legend(prop={'size': 6})
-
-    plt.xlabel("|M|+|N|")
-    plt.ylabel("Shifted geo mean")
-    plt.title(save_name)
-    
-    # Ensure the directory exists before saving the plot (F2)
-    save_path = os.path.join(plot_folder, save_name)
-    ensure_directory_exists(os.path.dirname(save_path))
-    plt.savefig(save_path)
-    
-
-    return
-
 
 def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_name):
 
@@ -181,7 +143,6 @@ def plot_obj_vs_k(results_df, plot_folder, amenity_name, model_name, display_nam
     plt.savefig(save_path)
 
     return
-
 
 def all_instances_obj(data_root, results_folder,processed_folder):
     INCLUDE_BP=False
@@ -519,75 +480,6 @@ def all_instances_obj(data_root, results_folder,processed_folder):
         summary_df = pd.DataFrame(results_D)
         summary_df["best"] = summary_df[["mip", "cp","greedy"]].max(axis=1)
         summary_df.to_csv(df_filename, index=False)
-    return
-
-
-def single_aggregate_obj(data_root, results_folder,processed_folder):
-
-    # NOTE: THIS IS A RELATXATION, AS IT ALLOWS COMPETING RESOURCES TO BE TOGETHER AND DISREGARDS THE CAPACITY CONSTRAINTS
-    D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
-
-    # no depth
-    print("single aggregate, no depth")
-
-    L_nia = []
-    L_mip_obj = []
-    L_cp_obj = []
-    L_greedy_obj = []
-    L_k = []
-
-    for nia in list(D_NIA.keys()):
-        print("nia:",nia)
-        for k in range(1,10):
-            L_nia.append(nia)
-            L_k.append(k)
-
-            amenities = ["grocery", "restaurant", "school"]
-
-            #  MIP
-            all_type_dist=[]
-            for amenity in amenities:
-                filename = "assignment_NIA_%s_%s_%s.csv" % (nia,k,amenity)
-                mip_df = pd.read_csv(os.path.join(results_folder,"sol","OptSingle_False_0",filename), index_col=None, header=0)
-                all_type_dist.append(mip_df["dist"])
-            multiple_dist = np.array(all_type_dist)
-            weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-            scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-            score_obj = np.mean(scores)
-            L_mip_obj.append(score_obj)
-
-            # CP
-            all_type_dist = []
-            for amenity in amenities:
-                filename = "assignment_NIA_%s_%s_%s.csv" % (nia, k, amenity)
-                cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptSingleCP_False_0", filename),index_col=None, header=0)
-                all_type_dist.append(cp_df["dist"])
-            multiple_dist = np.array(all_type_dist)
-            weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-            scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-            score_obj = np.mean(scores)
-            L_cp_obj.append(score_obj)
-
-            # Greedy
-            all_type_dist = []
-            for amenity in amenities:
-                filename = "assignment_NIA_%s_%s_%s.csv" % (nia, k, amenity)
-                greedy_df = pd.read_csv(os.path.join(results_folder, "sol", "GreedySingle_False_0", filename), index_col=None,header=0)
-                all_type_dist.append(greedy_df["dist"])
-            multiple_dist = np.array(all_type_dist)
-            weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-            scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-            score_obj = np.mean(scores)
-            L_greedy_obj.append(score_obj)
-
-
-        results_D = { "nia":L_nia, "k": L_k ,"mip":L_mip_obj,"cp":L_cp_obj,"greedy":L_greedy_obj}
-        df_filename = os.path.join(processed_folder, "single_aggregate_no_depth.csv")
-        summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp", "greedy"]].max(axis=1)
-        summary_df.to_csv(df_filename,index=False)
-
-
     return
 
 def plot_quality(processed_folder):
@@ -994,7 +886,6 @@ def quality_table_by_group_multiple(processed_folder):
 
     return
 
-
 def quality_table_by_k_multiple(processed_folder):
 
     summary_filename = os.path.join(processed_folder, "nia_summary.csv")
@@ -1040,68 +931,6 @@ def quality_table_by_k_multiple(processed_folder):
     output_df.to_csv(df_filename,index=False)
 
     return
-
-def quality_table_by_group_single(processed_folder):
-
-    summary_filename = os.path.join(processed_folder, "nia_summary.csv")
-    summary_df = pd.read_csv(summary_filename)
-
-    num_nia = []
-    num_ins = []
-
-    L_MILP_no_depth = []
-    L_CP_no_depth = []
-    L_greedy_no_depth = []
-
-    L_MILP_depth = []
-    L_CP_depth = []
-    L_greedy_depth = []
-
-    group_thres = [0, 200, 400, 600, 2000]
-    groups_name = ['[0,200)', '[200,400)', '[400,600)]', '[[600,inf)]']
-
-    for p in range(len(group_thres) - 1):
-        group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
-        num_nia.append(len(group_df))
-        num_ins.append(len(group_df)*9)
-
-    # no depth
-
-    all_obj_df = pd.read_csv(os.path.join(processed_folder, "multiple.csv"), index_col=None, header=0)
-    for p in range(len(group_thres) - 1):
-        group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
-        obj_group_df = all_obj_df[all_obj_df["nia"].isin(group_df['nia'])]
-        L_MILP_no_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['mip']) / obj_group_df['best']))
-        L_CP_no_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['cp']) / obj_group_df['best']))
-        L_greedy_no_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['greedy']) / obj_group_df['best']))
-
-    # depth of choice
-
-    all_obj_df = pd.read_csv(os.path.join(processed_folder, "multiple_depth.csv"), index_col=None, header=0)
-    for p in range(len(group_thres) - 1):
-        group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
-        obj_group_df = all_obj_df[all_obj_df["nia"].isin(group_df['nia'])]
-        L_MILP_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['mip']) / obj_group_df['best']))
-        L_CP_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['cp']) / obj_group_df['best']))
-        L_greedy_depth.append(100*np.mean((obj_group_df['best'] - obj_group_df['greedy']) / obj_group_df['best']))
-
-    output_D = { "|M|+|N|":groups_name,
-                 "MILP":L_MILP_no_depth, "CP": L_CP_no_depth ,"Greedy":L_greedy_no_depth,
-                 "MILP_d":L_MILP_depth, "CP_d": L_CP_depth ,"Greedy_d":L_greedy_depth}
-    df_filename = os.path.join(processed_folder, "quality_by_group_multiple.csv")
-    output_df = pd.DataFrame(output_D)
-
-    output_df.loc[:, "MILP"] = output_df["MILP"].map('{:.4f}'.format)
-    output_df.loc[:, "CP"] = output_df["CP"].map('{:.4f}'.format)
-    output_df.loc[:, "Greedy"] = output_df["Greedy"].map('{:.4f}'.format)
-    output_df.loc[:, "MILP_d"] = output_df["MILP_d"].map('{:.4f}'.format)
-    output_df.loc[:, "CP_d"] = output_df["CP_d"].map('{:.4f}'.format)
-    output_df.loc[:, "Greedy_d"] = output_df["Greedy_d"].map('{:.4f}'.format)
-
-    output_df.to_csv(df_filename,index=False)
-
-    return output_df
-
 
 def opt_feas_multiple(results_folder, processed_folder):
 
@@ -1475,7 +1304,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
         
         print("nia:", nia)
         k = 0
-        filename = f"assignment_NIA_{nia}_{k},{k},{k}.csv"
+        filename = f"assignment_NIA_{nia}_{k},{k},{k},{k}.csv"
         greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
         summary_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", f"NIA_{nia}_{k},{k},{k}.csv")
 
@@ -1533,7 +1362,6 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
     plt.savefig(os.path.join(save_dir, "cur_score.png"))
 
     return
-
 
 def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_folder):
     
@@ -1862,13 +1690,13 @@ if __name__ == "__main__":
 
     results_folder = "results"
     plot_folder = "results_plot"
-    data_root =  "/Users/annve/Downloads/AAAI23-WalkabilityOptimization"
+    data_root =  r"C:\Users\HP\Documents\GitHub\AAAI23-WalkabilityOptimization"
     processed_folder= "processed_results"
     preprocessing_folder = "./preprocessing"
     
     nia_avg_walking_time(data_root,plot_folder,results_folder,preprocessing_folder)
-    nia_avg_walking_time_2(data_root, plot_folder, results_folder, preprocessing_folder)
-    hist_distances(data_root, results_folder,processed_folder,plot_folder)
+    #nia_avg_walking_time_2(data_root, plot_folder, results_folder, preprocessing_folder)
+    #hist_distances(data_root, results_folder,processed_folder,plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
     #quality_table(results_folder, processed_folder)

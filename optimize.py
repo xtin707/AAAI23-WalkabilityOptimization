@@ -26,7 +26,9 @@ print("Received arguments:", sys.argv)
 if unknown:
     print("Ignoring unknown arguments:", unknown)
 
-data_root = r"C:\Users\annve\Downloads\Walkability For All"
+
+#data_root = r"C:\Users\annve\Downloads\Walkability For All"
+data_root = r"C:\Users\HP\Documents\GitHub\AAAI23-WalkabilityOptimization"
 preprocessing_folder = "./preprocessing"
 #Thread count (18) is larger than processor count (12) Reduce the value of the Threads parameter to improve performance
 threads = 12 
@@ -68,7 +70,7 @@ if __name__ == "__main__":
     status_L = []
 
     # For the simplified script we only keep multiple-amenity result collectors
-    num_existing_L_grocery, num_existing_L_restaurant, num_existing_L_school, num_existing_L_healthcare = [], [], [],  []
+    num_existing_L_grocery, num_existing_L_restaurant, num_existing_L_school, num_existing_L_healthcare = [], [], [], []
     dist_obj_L_grocery, dist_obj_L_restaurant, dist_obj_L_school, dist_obj_L_healthcare = [], [], [], []
     k_L_grocery, k_L_restaurant, k_L_school, k_L_healthcare = [], [], [], []
 
@@ -98,7 +100,7 @@ if __name__ == "__main__":
 
         # Handles multiple-amenity model
         if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultiple','GreedyMultipleDepth']:
-            if args.k_array != '0,0,0' and args.k_array is not None:
+            if args.k_array != '0,0,0,0' and args.k_array is not None:
                 k_array = [int(x) for x in args.k_array.split(',')]
                 log_file_name = os.path.join(sol_folder, "log_NIA_%s_%s.txt" % (nia_id, args.k_array))
                 if not 'Greedy' in args.model:
@@ -119,7 +121,7 @@ if __name__ == "__main__":
                         score_obj, [dist_grocery, dist_restaurant, dist_school, dist_healthcare], solving_time, m, allocated_D, assigned_D, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school, num_cur_healthcare], status \
                             = greedy_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, healthcare_df, D, k_array)
             else:    
-                # k_array == '0,0,0' compute current assignment distances per amenity and compute weighted score
+                # k_array == '0,0,0,0' compute current assignment distances per amenity and compute weighted score
                 multiple_dist = []
                 # grocery
                 score_obj, dist_grocery, solving_time, m, assigned_D, num_residents, num_cur_grocery, status = cur_assignment_single(residentials_df, grocery_df, D, args.bp, args.focus, EPS=0.5)
@@ -166,6 +168,19 @@ if __name__ == "__main__":
         else:
             print("choose a model name - allowed: OptMultiple, OptMultipleDepth, GreedyMultiple, GreedyMultipleLazy, GreedyMultipleDepth")
 
+        if 'Greedy' in args.model:
+            # If greedy model did not populate assignment (common case)
+            if assigned_D is None or not isinstance(assigned_D, dict) or len(assigned_D) == 0:
+                assigned_D = get_nearest(
+                    residentials_df,
+                    parking_df,
+                    grocery_df,
+                    restaurant_df,
+                    school_df,
+                    healthcare_df,
+                    D
+                )
+                
         # saving & plotting 
         if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultipleDepth','GreedyMultiple','GreedyMultipleLazy']:
             if args.k_array != '0,0,0' and args.k_array is not None:
@@ -174,7 +189,7 @@ if __name__ == "__main__":
                 with open(allocated_f_name, 'wb') as f:
                     pickle.dump(allocated_D, f)
             else:
-                k_name = '0,0,0'
+                k_name = '0,0,0,0'
 
             assigned_f_name = os.path.join(sol_folder, "assignment_NIA_%s_%s.csv" % (nia_id, k_name))
             model_f_name = os.path.join(sol_folder, "NIA_%s_%s.sol" % (nia_id, k_name))
@@ -210,7 +225,7 @@ if __name__ == "__main__":
         dist_obj_L_school.append(dist_school if 'dist_school' in locals() else None)
         dist_obj_L_healthcare.append(dist_healthcare if 'dist_healthcare' in locals() else None)
 
-        if args.k_array != '0,0,0' and args.k_array is not None:
+        if args.k_array != '0,0,0,0' and args.k_array is not None:
             k_L_grocery.append(k_array[0])
             k_L_restaurant.append(k_array[1])
             k_L_school.append(k_array[2])
@@ -254,5 +269,5 @@ if __name__ == "__main__":
             "num_cur_healthcare": num_existing_L_healthcare,
             "model_status": status_L
         }
-        summary_df_filename = os.path.join(summary_folder, "NIA_%s_%s_summary.csv" % (nia_id, model_save_name))
+        summary_df_filename = os.path.join(summary_folder, "NIA_%s_%s_summary.csv" % (nia_id, k_name))
         pd.DataFrame(results_D).to_csv(summary_df_filename, index=False)

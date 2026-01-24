@@ -232,3 +232,20 @@ Time limit reached
 Warning: max constraint violation (1.1458e-04) exceeds tolerance
 Warning: max general constraint violation (1.1458e-04) exceeds tolerance
 Best objective 8.078455263710e+01, best bound 8.913880705558e+01, gap 10.3414%
+
+Gurobi 13.0.0 (win64) logging started Mon Jan 19 22:34:20 2026
+
+Set parameter LogFile to value "results\sol\OptMultipleDepth_False_0\log_NIA_2_3,3,3,3.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 13.0.0 build v13.0.0rc1 (win64 - Windows 11.0 (22631.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  12
+
