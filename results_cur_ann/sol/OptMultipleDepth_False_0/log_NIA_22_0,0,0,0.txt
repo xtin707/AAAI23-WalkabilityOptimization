@@ -1,0 +1,58 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec 16 20:45:55 2025
+
+Set parameter LogFile to value "results\sol\OptMultipleDepth_False_0\log_NIA_22_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  12
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 159634 rows, 193582 columns and 833007 nonzeros
+Model fingerprint: 0x8b5666d8
+Model has 218 simple general constraints
+  218 PWL
+Variable types: 436 continuous, 193146 integer (192930 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 2e+03]
+  Objective range  [5e-03, 5e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 4e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 152440 rows and 140211 columns
+Presolve time: 0.25s
+Presolved: 7194 rows, 53371 columns, 142454 nonzeros
+Presolved model has 218 SOS constraint(s)
+Variable types: 1744 continuous, 51627 integer (51627 binary)
+Performing another presolve...
+Presolve removed 7151 rows and 53137 columns
+Presolve time: 1.49s
+
+Root relaxation: objective 7.801652e+01, 55 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   78.01652    0    5          -   78.01652      -     -    1s
+     0     0   77.93038    0    4          -   77.93038      -     -    1s
+H    0     0                      77.8575661   77.93038  0.09%     -    1s
+
+Cutting planes:
+  Implied bound: 1
+
+Explored 1 nodes (57 simplex iterations) in 1.93 seconds (0.72 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: 77.8576 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.785756606815e+01, best bound 7.785756606815e+01, gap 0.0000%

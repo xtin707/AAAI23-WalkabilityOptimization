@@ -6,6 +6,14 @@ import numpy as np
 import copy
 from map_utils import map_back_allocate, map_back_assign
 
+options = {
+    "WLSACCESSID": "92509892-997f-4996-a2de-d9155dc44f2d",
+    "WLSSECRET": "cc2cbea5-780a-40f6-83be-6ce092193670",
+    "LICENSEID": 2625989,
+}
+with gp.Env(params=options) as env, gp.Model(env=env) as model:
+    # Formulate problem
+    model.optimize()
 
 #note: change weights prioritizing the needs of elderly 
 amenity_weights_dict = { "grocery": [3],

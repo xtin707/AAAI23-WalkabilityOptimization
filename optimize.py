@@ -1,4 +1,5 @@
 # Edited optimize.py - single-amenity & CP models removed
+# Optimize version(from Makom 1/25/2026)
 from graph_utils import *
 from map_utils import *
 from model_latest import * 
@@ -122,6 +123,8 @@ if __name__ == "__main__":
                             = greedy_multiple_depth(residentials_df, parking_df, grocery_df, restaurant_df, school_df, healthcare_df, D, k_array)
             else:    
                 # k_array == '0,0,0,0' compute current assignment distances per amenity and compute weighted score
+                # In the args.k_array == '0,0,0,0' branch, add:
+                allocated_D = {}  # Empty allocation since we're just computing current distances
                 multiple_dist = []
                 # grocery
                 score_obj, dist_grocery, solving_time, m, assigned_D, num_residents, num_cur_grocery, status = cur_assignment_single(residentials_df, grocery_df, D, args.bp, args.focus, EPS=0.5)
@@ -163,7 +166,7 @@ if __name__ == "__main__":
 
                 solving_time=None
                 status=None
-                assigned_D = get_nearest(residentials_df, parking_df, grocery_df, restaurant_df, school_df, D)
+                assigned_D = get_nearest(residentials_df, parking_df, grocery_df, restaurant_df, school_df, healthcare_df, D)
 
         else:
             print("choose a model name - allowed: OptMultiple, OptMultipleDepth, GreedyMultiple, GreedyMultipleLazy, GreedyMultipleDepth")

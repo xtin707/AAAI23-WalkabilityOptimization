@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+115,Mount Dennis,3,3,3,3,95.64025236266858,216.9298646315296,"[269.2416673368205, 325.8382729101828, 412.12114904065396, 417.1061634749715, 715.4542733540676, 711.7457993771294, 713.4676107300481, 694.3016919262903, 887.573277015711, 885.9348322993047]",266.81122903946255,145.21107073459805,34.6800000667572,151,39,9,12,5,3,2

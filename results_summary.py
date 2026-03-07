@@ -1276,7 +1276,7 @@ import numpy as np
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
-def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_folder):
+def nia_avg_walking_time(data_root, plot_folder, results_folder):
     SIZE = 7
     plt.figure(dpi=300)
 
@@ -1298,6 +1298,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
     dist_res1 = []
     dist_res2 = []
     dist_school = []
+    dist_healthcare = []
     walk_obj = []
 
     for nia in [int(item) for item in nia_shape["area_sh11"]]:
@@ -1306,14 +1307,15 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
         k = 0
         filename = f"assignment_NIA_{nia}_{k},{k},{k},{k}.csv"
         greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
-        summary_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", f"NIA_{nia}_{k},{k},{k}.csv")
+        summary_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", f"NIA_{nia}_{k},{k},{k},{k}_summary.csv")
 
         if os.path.exists(greedy_path) and os.path.exists(summary_path):
             greedy_df = pd.read_csv(greedy_path, index_col=None, header=0)
             greedy_df_result = pd.read_csv(summary_path, index_col=None, header=0)
         else:
             print("???????? File not found:", greedy_path, "or", summary_path)
-            greedy_df = pd.DataFrame()  # Assign an empty DataFrame to avoid UnboundLocalError
+            # Assign an empty DataFrame to avoid UnboundLocalError
+            greedy_df = pd.DataFrame() 
             greedy_df_result = pd.DataFrame()
 
         # Check if the required columns exist before accessing them
@@ -1322,12 +1324,14 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
             dist_res1.append(np.mean(greedy_df["0_dist_restaurant"]))
             dist_res2.append(np.mean(greedy_df["1_dist_restaurant"]))
             dist_school.append(np.mean(greedy_df["dist_school"]))
+            dist_healthcare.append(np.mean(greedy_df["dist_healthcare"]))
         else:
             print(f"Warning: Missing required columns in {greedy_path}")
             dist_grocery.append(np.nan)
             dist_res1.append(np.nan)
             dist_res2.append(np.nan)
             dist_school.append(np.nan)
+            dist_healthcare.append(np.nan)
 
         if not greedy_df_result.empty and "obj" in greedy_df_result.columns:
             walk_obj.append(np.mean(greedy_df_result["obj"]))
@@ -1339,6 +1343,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
     nia_shape["dist_res1"] = (np.array(dist_res1) / speed) / 60
     nia_shape["dist_res2"] = (np.array(dist_res2) / speed) / 60
     nia_shape["dist_school"] = (np.array(dist_school) / speed) / 60
+    nia_shape["dist_healthcare"] = (np.array(dist_healthcare) / speed) / 60
     nia_shape["walk_obj"] = np.array(walk_obj)
 
     ax = nia_shape.plot(column="walk_obj", legend=True, legend_kwds={"shrink": 0.5}, cmap="OrRd")
@@ -1363,7 +1368,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder, preprocessing_f
 
     return
 
-def nia_avg_walking_time_2(data_root,plot_folder,results_folder,preprocessing_folder):
+def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
     
     SIZE=7
     plt.figure(dpi=900)
@@ -1692,10 +1697,10 @@ if __name__ == "__main__":
     plot_folder = "results_plot"
     data_root =  r"C:\Users\HP\Documents\GitHub\AAAI23-WalkabilityOptimization"
     processed_folder= "processed_results"
-    preprocessing_folder = "./preprocessing"
+    #preprocessing_folder = "./preprocessing"
     
-    nia_avg_walking_time(data_root,plot_folder,results_folder,preprocessing_folder)
-    #nia_avg_walking_time_2(data_root, plot_folder, results_folder, preprocessing_folder)
+    nia_avg_walking_time(data_root,plot_folder,results_folder)
+    #nia_avg_walking_time_2(data_root, plot_folder, results_folder)
     #hist_distances(data_root, results_folder,processed_folder,plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)

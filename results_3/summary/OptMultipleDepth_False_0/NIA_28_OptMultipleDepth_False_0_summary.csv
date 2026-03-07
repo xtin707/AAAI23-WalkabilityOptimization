@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+28,Rustic,0,0,0,0,37.99698630593964,1478.0201999183305,"[1357.2673139939584, 1357.2673139939584, 0, 0, 0, 0, 0, 0, 0, 0]",740.5538736931601,263.1940233886331,0.26199984550476074,148,26,1,2,3,1,2

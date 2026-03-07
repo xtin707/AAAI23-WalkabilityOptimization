@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+27,York University Heights,0,0,0,0,70.41518613416156,697.2580250925474,872.4077031705397,664.7163071788714,1049.6002093016446,3.01200008392334,407,200,26,43,10,14,2

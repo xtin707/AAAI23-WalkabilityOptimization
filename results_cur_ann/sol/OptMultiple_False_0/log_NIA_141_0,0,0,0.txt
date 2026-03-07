@@ -1,0 +1,61 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec  9 02:43:09 2025
+
+Set parameter LogFile to value "results\sol\OptMultiple_False_0\log_NIA_141_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 18 threads
+
+Warning: Thread count (18) is larger than processor count (12)
+         Reduce the value of the Threads parameter to improve performance
+
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  18
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 120021 rows, 142556 columns and 517477 nonzeros
+Model fingerprint: 0x335cb906
+Model has 574 simple general constraints
+  574 PWL
+Variable types: 1148 continuous, 141408 integer (141408 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+03]
+  Objective range  [2e-03, 2e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 4e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 115429 rows and 113873 columns
+Presolve time: 0.22s
+Presolved: 4592 rows, 28683 columns, 59662 nonzeros
+Presolved model has 574 SOS constraint(s)
+Variable types: 4592 continuous, 24091 integer (24091 binary)
+Performing another presolve...
+Presolve removed 4574 rows and 28639 columns
+Presolve time: 1.46s
+Found heuristic solution: objective 74.3004589
+
+Root relaxation: objective 7.432550e+01, 8 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   74.32550    0    5   74.30046   74.32550  0.03%     -    2s
+
+Explored 1 nodes (8 simplex iterations) in 2.08 seconds (0.31 work units)
+Thread count was 18 (of 12 available processors)
+
+Solution count 1: 74.3005 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.3765e-01) exceeds tolerance
+Warning: max general constraint violation (8.0398e-04) exceeds tolerance
+         (model may be infeasible or unbounded - try turning presolve off)
+Best objective 7.430045892514e+01, best bound 7.430271682649e+01, gap 0.0030%

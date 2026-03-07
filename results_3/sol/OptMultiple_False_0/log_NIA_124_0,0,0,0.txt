@@ -1,0 +1,57 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec  9 02:41:42 2025
+
+Set parameter LogFile to value "results\sol\OptMultiple_False_0\log_NIA_124_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 18 threads
+
+Warning: Thread count (18) is larger than processor count (12)
+         Reduce the value of the Threads parameter to improve performance
+
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  18
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 45425 rows, 50476 columns and 188745 nonzeros
+Model fingerprint: 0x87652497
+Model has 213 simple general constraints
+  213 PWL
+Variable types: 426 continuous, 50050 integer (50050 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+03]
+  Objective range  [5e-03, 5e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 6e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 45407 rows and 50444 columns
+Presolve time: 0.59s
+Presolved: 18 rows, 32 columns, 79 nonzeros
+Variable types: 7 continuous, 25 integer (25 binary)
+Found heuristic solution: objective 78.7850627
+
+Root relaxation: cutoff, 2 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0        78.78506   78.78506  0.00%     -    0s
+
+Explored 1 nodes (2 simplex iterations) in 0.64 seconds (0.10 work units)
+Thread count was 18 (of 12 available processors)
+
+Solution count 1: 78.7851 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0555e-01) exceeds tolerance
+Warning: max general constraint violation (9.3804e-04) exceeds tolerance
+         (model may be infeasible or unbounded - try turning presolve off)
+Best objective 7.878506266930e+01, best bound 7.878506266930e+01, gap 0.0000%

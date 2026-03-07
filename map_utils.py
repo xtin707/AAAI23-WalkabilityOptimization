@@ -233,7 +233,8 @@ def map_back_assign(assignments, df_from, df_to, dict):
 
 if __name__ == "__main__":
     
-    data_root = r"C:\Users\annve\Downloads\Walkability For All" #NEW ALTERED
+    #data_root = r"C:\Users\annve\Downloads\Walkability For All" #NEW ALTERED
+    data_root = r"C:\Users\HP\Documents\GitHub\AAAI23-WalkabilityOptimization"
 
 
 
