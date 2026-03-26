@@ -186,7 +186,7 @@ if __name__ == "__main__":
                 
         # saving & plotting 
         if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultipleDepth','GreedyMultiple','GreedyMultipleLazy']:
-            if args.k_array != '0,0,0' and args.k_array is not None:
+            if args.k_array != '0,0,0,0' and args.k_array is not None:
                 k_name = args.k_array
                 allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s.pkl" % (nia_id, k_name))
                 with open(allocated_f_name, 'wb') as f:
@@ -247,9 +247,6 @@ if __name__ == "__main__":
         status_L.append(status)
 
         # plotting 
-        if args.k_array != '0,0,0' and args.k_array is not None:
-            pass  # skip single-amenity plotting
-
         os.makedirs(summary_folder, exist_ok=True)
         results_D = {
             "nia_id": nia_id_L,

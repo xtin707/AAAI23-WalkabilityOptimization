@@ -1,0 +1,51 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec 16 20:50:14 2025
+
+Set parameter LogFile to value "results\sol\OptMultipleDepth_False_0\log_NIA_61_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 12 threads
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  12
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 13514 rows, 15621 columns and 62280 nonzeros
+Model fingerprint: 0x11bf8201
+Model has 103 simple general constraints
+  103 PWL
+Variable types: 206 continuous, 15415 integer (15347 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 7e+02]
+  Objective range  [1e-02, 1e-02]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 2e+02]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 13489 rows and 15565 columns
+Presolve time: 0.19s
+Presolved: 25 rows, 56 columns, 139 nonzeros
+Variable types: 7 continuous, 49 integer (49 binary)
+Found heuristic solution: objective 82.7427588
+Found heuristic solution: objective 82.7472386
+
+Root relaxation: objective 8.286483e+01, 18 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   82.86483    0    5   82.74724   82.86483  0.14%     -    0s
+
+Explored 1 nodes (18 simplex iterations) in 0.21 seconds (0.05 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 2: 82.7472 82.7428 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.274723862334e+01, best bound 8.275447723358e+01, gap 0.0087%

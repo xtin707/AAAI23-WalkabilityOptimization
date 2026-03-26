@@ -1115,11 +1115,13 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
     dist_res_1_before = []
     dist_res_2_before = []
     dist_school_before = []
+    dist_healthcare_before =[]
 
     dist_grocery_after = {}
     dist_res_1_after = {}
     dist_res_2_after = {}
     dist_school_after = {}
+    dist_healthcare_after = {}
 
     #k = 4
     # ORIG: all_k = [2,3]
@@ -1130,10 +1132,11 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
         dist_res_1_after[k] = []
         dist_res_2_after[k] = []
         dist_school_after[k] = []
+        dist_healthcare_after[k] = []
         for nia in list(D_NIA.keys()):
             print("nia:", nia)
 
-            filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
+            filename = "assignment_NIA_%s_%s,%s,%s,%s.csv" % (nia, k, k, k, k)
 
             if use == 'mip':
                 #  MILP
@@ -1144,6 +1147,7 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                     dist_school = mip_df["dist_school"]
                     dist_res_1 = list(mip_df["0_dist_restaurant"])
                     dist_res_2 = list(mip_df["1_dist_restaurant"])
+                    dist_healthcare = mip_df["dist_healthcare"]
 
                 elif os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
                     # if not feasible, use greedy solution 
@@ -1152,6 +1156,7 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                             index_col=None, header=0)
                         dist_grocery = greedy_df["dist_grocery"]
                         dist_school = greedy_df["dist_school"]
+                        dist_healthcare = greedy_df["dist_healthcare"]
                         dist_res_1 = list(greedy_df["0_dist_restaurant"])
                         dist_res_2 = list(greedy_df["1_dist_restaurant"])
                 else: 
@@ -1160,25 +1165,9 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
 
                 dist_grocery_after[k] += list(dist_grocery)
                 dist_school_after[k] += list(dist_school)
+                dist_healthcare_after[k] += list(dist_healthcare)
                 dist_res_1_after[k] += list(dist_res_1)
                 dist_res_2_after[k] += list(dist_res_2)
-
-            else:
-                # CP
-                if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepthCP_False_0", filename)):
-                    cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepthCP_False_0", filename), index_col=None, header=0)
-                    dist_grocery = cp_df["dist_grocery"]
-                    choices_dist = [cp_df[str(c) + "_dist_restaurant"] if (str(c) + "_dist_restaurant") in mip_df.columns else L_a[-2] for c in range(10)]
-                    dist_school = cp_df["dist_school"]
-
-                else: 
-                    print(f"File not found for NIA {nia}, skipping...")
-                    continue
-
-                dist_grocery_after[k] += list(dist_grocery)
-                dist_school_after[k] += list(dist_school)
-                dist_res_1_after[k] += list(cp_df["0_dist_restaurant"])
-                dist_res_2_after[k] += list(cp_df["1_dist_restaurant"])
 
     k = 0
 
@@ -1186,20 +1175,25 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
     for nia in list(D_NIA.keys()):
         print("nia:", nia)
 
-        filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
+        filename = "assignment_NIA_%s_%s,%s,%s,%s.csv" % (nia, k, k, k, k)
 
         if os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
             greedy_df = pd.read_csv(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename),
                                  index_col=None, header=0)
             dist_grocery = greedy_df["dist_grocery"]
             dist_school = greedy_df["dist_school"]
+            dist_healthcare = greedy_df["dist_healthcare"]
+            dist_res_1 = list(greedy_df["0_dist_restaurant"])
+            dist_res_2 = list(greedy_df["1_dist_restaurant"])
+
         else:
             print("????????")
 
         dist_grocery_before += list(dist_grocery)
         dist_school_before += list(dist_school)
-        dist_res_1_before += list(greedy_df["0_dist_restaurant"])
-        dist_res_2_before += list(greedy_df["1_dist_restaurant"])
+        dist_res_1_before += list(dist_res_1)
+        dist_res_2_before += list(dist_res_2)
+        dist_healthcare_before += list(dist_healthcare)
 
     speed = 1.2
     transp = 0.5
@@ -1212,22 +1206,25 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
     time_res_1_before = (np.array(dist_res_1_before) / speed) / 60
     time_res_2_before = (np.array(dist_res_2_before) / speed) / 60
     time_school_before = (np.array(dist_school_before) / speed) / 60
+    time_healthcare_before = (np.array(dist_healthcare_before) / speed) / 60
 
     time_grocery_after = {}
     time_res_1_after = {}
     time_res_2_after = {}
     time_school_after = {}
+    time_healthcare_after = {}
 
     for k in all_k:
         time_grocery_after[k] = (np.array(dist_grocery_after[k]) / speed) / 60
         time_res_1_after[k] = (np.array(dist_res_1_after[k]) / speed) / 60
         time_res_2_after[k] = (np.array(dist_res_2_after[k]) / speed) / 60
         time_school_after[k] = (np.array(dist_school_after[k]) / speed) / 60
+        time_healthcare_after[k] = (np.array(dist_healthcare_after[k]) / speed) / 60
 
-    L_all_before = [time_grocery_before, time_res_1_before, time_res_2_before, time_school_before]
-    L_all_after = [[time_grocery_after[k] for k in all_k], [time_res_1_after[k] for k in all_k], [time_res_2_after[k] for k in all_k], [time_school_after[k] for k in all_k]]
-    L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png"]
-    L_all_type_names = ["grocery", "res1", "res2", "school"]
+    L_all_before = [time_grocery_before, time_res_1_before, time_res_2_before, time_school_before, time_healthcare_before]
+    L_all_after = [[time_grocery_after[k] for k in all_k], [time_res_1_after[k] for k in all_k], [time_res_2_after[k] for k in all_k], [time_school_after[k] for k in all_k], [time_healthcare_after[k] for k in all_k]]
+    L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png","nearest heathcare.png"]
+    L_all_type_names = ["grocery", "res1", "res2", "school", "healthcare"]
 
 
     for ind in range(len(L_all_type_names)):
@@ -1284,11 +1281,8 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder):
 
     nia_shape = get_nias(data_root)
 
-    # Ensure geometries are in a projected CRS before computing centroids
-    #if nia_shape.crs is None or nia_shape.crs.to_epsg() != 3857:
-    #    nia_shape = nia_shape.to_crs(epsg=3857)  # Convert to a projected CRS
-
-    nia_shape["center"] = nia_shape["geometry"].centroid  # Now safe to compute centroids
+    nia_shape = nia_shape.to_crs(epsg=4326) # Convert to latitude/longitude
+    nia_shape["center"] = nia_shape["geometry"].centroid 
     nia_points = nia_shape.copy()
     nia_points.set_geometry("center", inplace=True)
 
@@ -1339,6 +1333,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder):
             print(f"Warning: Missing 'obj' column in {summary_path}")
             walk_obj.append(np.nan)
 
+
     nia_shape["dist_grocery"] = (np.array(dist_grocery) / speed) / 60
     nia_shape["dist_res1"] = (np.array(dist_res1) / speed) / 60
     nia_shape["dist_res2"] = (np.array(dist_res2) / speed) / 60
@@ -1368,6 +1363,7 @@ def nia_avg_walking_time(data_root, plot_folder, results_folder):
 
     return
 
+
 def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
     
     SIZE=7
@@ -1380,7 +1376,8 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
     # reading pednet file
     # pednet_path = os.path.join(data_root, "pednet.zip")
     # pednet = gpd.read_file(pednet_path)
-    #nia_shape["geometry"] = nia_shape["geometry"].to_crs(epsg=3857)  # NEW ADDED Replace EPSG code with your target projected CRS
+    #nia_shape["geometry"] = nia_shape["geometry"].to_crs(epsg=3857)
+    nia_shape = nia_shape.to_crs(epsg=4326)
     nia_shape["center"] = nia_shape["geometry"].centroid
     nia_points = nia_shape.copy()
     nia_points.set_geometry("center", inplace=True)
@@ -1393,19 +1390,20 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
 
             ###############
             print("nia:", nia)
-            filename = "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
+            filename = "NIA_%s_%s,%s,%s,%s_summary.csv" % (nia, k, k, k, k)
+
             
-            obj = np.nan  # ✅ Set a default value to prevent UnboundLocalError
+            #obj = np.nan   ✅ Set a default value to prevent UnboundLocalError
             
             #  MIP
             if os.path.exists(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename)):
                 mip_df = pd.read_csv(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
-                obj=mip_df["obj"]
+                obj=mip_df["obj"].iloc[0]
             else:
                 # if not feasible, use greedy solution
                 if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename)):
                     greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename), index_col=None, header=0)
-                    obj=greedy_df["obj"]
+                    obj=greedy_df["obj"].iloc[0]
 
             walk_obj.append(obj)
             ###############
@@ -1417,6 +1415,9 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
                     cleaned_walk_obj.append(w.iloc[0])  # extract the float value from the Series
                 else:
                     cleaned_walk_obj.append(w)
+            
+            print("Using file:", filename)
+            print("Obj value:", obj)
 
         nia_shape["walk_obj_" + str(k)] = np.array(cleaned_walk_obj)
 
@@ -1434,12 +1435,12 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
         edgecolor='white',
         linewidth=0.5
     )
-    
+
     # ALTERED cbar = ax.get_figure().get_axes()[1] cbar.yaxis.set_major_locator(ticker.MultipleLocator(10))
     # Colorbar tick formatting
     cbar = ax.get_figure().get_axes()[1]
     cbar.yaxis.set_major_locator(ticker.MultipleLocator(10))
-    #cbar.set_ylim(vmin, vmax)
+    cbar.set_ylim(9, 55)
     
     
     texts = []
@@ -1689,6 +1690,72 @@ def avg_obj_vs_k_multi(results_folder, plot_folder):
 
     return
 
+def plot_walkability_comparison(data_root, plot_folder, results_folder):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import os
+    import pandas as pd
+
+    SIZE = 7
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5), dpi=300)
+
+    nia_shape = get_nias(data_root).to_crs(epsg=4326)
+    nia_shape["center"] = nia_shape["geometry"].centroid
+    nia_points = nia_shape.copy()
+    nia_points.set_geometry("center", inplace=True)
+
+    # Store results
+    results = {0: [], 3: []}
+
+    for k in [0, 3]:
+        for nia in [int(item) for item in nia_shape["area_sh11"]]:
+
+            filename = f"NIA_{nia}_{k},{k},{k},{k}_summary.csv"
+            path = os.path.join(results_folder, "summary", f"GreedyMultipleDepth_False_{k}", filename)
+
+            if os.path.exists(path):
+                df = pd.read_csv(path)
+                obj = df["obj"].iloc[0]
+            else:
+                print(f"Missing file: NIA {nia}, k={k}")
+                obj = np.nan
+
+            results[k].append(obj)
+
+        nia_shape[f"walk_obj_{k}"] = np.array(results[k])
+
+    # Compute delta
+    nia_shape["delta"] = nia_shape["walk_obj_3"] - nia_shape["walk_obj_0"]
+
+    # --- Plot 1: Baseline ---
+    nia_shape.plot(column="walk_obj_0", cmap="OrRd", legend=True,
+                   legend_kwds={"shrink": 0.6}, ax=axes[0], edgecolor="white")
+    axes[0].set_title("Baseline WalkScore (k=0)", fontsize=SIZE)
+
+    # --- Plot 2: Optimized ---
+    nia_shape.plot(column="walk_obj_3", cmap="OrRd", legend=True,
+                   legend_kwds={"shrink": 0.6}, ax=axes[1], edgecolor="white")
+    axes[1].set_title("Optimized WalkScore (k=3)", fontsize=SIZE)
+
+    # --- Plot 3: Improvement ---
+    nia_shape.plot(column="delta", cmap="viridis", legend=True,
+                   legend_kwds={"shrink": 0.6}, ax=axes[2], edgecolor="white")
+    axes[2].set_title("Improvement (Δ WalkScore)", fontsize=SIZE)
+
+    # Remove axis
+    for ax in axes:
+        ax.axis("off")
+
+    plt.tight_layout()
+
+    # Save
+    save_dir = os.path.join(plot_folder, "final_eval")
+    ensure_directory_exists(save_dir)
+
+    plt.savefig(os.path.join(save_dir, "walkability_comparison.png"))
+    plt.savefig(os.path.join(save_dir, "walkability_comparison.pdf"))
+
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -1699,9 +1766,10 @@ if __name__ == "__main__":
     processed_folder= "processed_results"
     #preprocessing_folder = "./preprocessing"
     
-    nia_avg_walking_time(data_root,plot_folder,results_folder)
+    #nia_avg_walking_time(data_root,plot_folder,results_folder)
     #nia_avg_walking_time_2(data_root, plot_folder, results_folder)
-    #hist_distances(data_root, results_folder,processed_folder,plot_folder)
+    hist_distances(data_root, results_folder,processed_folder,plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
     #quality_table(results_folder, processed_folder)
+    #plot_walkability_comparison(data_root, plot_folder, results_folder)

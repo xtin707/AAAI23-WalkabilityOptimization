@@ -1,0 +1,59 @@
+
+Gurobi 12.0.0 (win64) logging started Tue Dec  9 02:41:58 2025
+
+Set parameter LogFile to value "results\sol\OptMultiple_False_0\log_NIA_125_0,0,0,0.txt"
+Set parameter TimeLimit to value 18000
+Set parameter MIPFocus to value 0
+Set parameter NodefileStart to value 0.5
+Gurobi Optimizer version 12.0.0 build v12.0.0rc1 (win64 - Windows 11.0 (26100.2))
+
+CPU model: 12th Gen Intel(R) Core(TM) i5-12450H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 12 logical processors, using up to 18 threads
+
+Warning: Thread count (18) is larger than processor count (12)
+         Reduce the value of the Threads parameter to improve performance
+
+
+Non-default parameters:
+TimeLimit  18000
+NodefileStart  0.5
+Threads  18
+
+Academic license 2625989 - for non-commercial use only - registered to aa___@up.edu.ph
+Optimize a model with 16997 rows, 18817 columns and 69591 nonzeros
+Model fingerprint: 0x7a954003
+Model has 145 simple general constraints
+  145 PWL
+Variable types: 290 continuous, 18527 integer (18527 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+03]
+  Objective range  [7e-03, 7e-03]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [1e+00, 5e+00]
+  PWLCon x range   [4e+02, 2e+03]
+  PWLCon y range   [0e+00, 1e+02]
+Presolve removed 16980 rows and 18797 columns
+Presolve time: 0.16s
+Presolved: 17 rows, 20 columns, 55 nonzeros
+Variable types: 7 continuous, 13 integer (13 binary)
+Found heuristic solution: objective 67.2278898
+Found heuristic solution: objective 67.3644720
+
+Root relaxation: objective 6.749840e+01, 9 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   67.49840    0    5   67.36447   67.49840  0.20%     -    0s
+     0     0          -    0        67.36447   67.36506  0.00%     -    0s
+
+Explored 1 nodes (11 simplex iterations) in 0.17 seconds (0.04 work units)
+Thread count was 18 (of 12 available processors)
+
+Solution count 2: 67.3645 67.2279 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.6444e-02) exceeds tolerance
+Warning: max general constraint violation (9.7931e-04) exceeds tolerance
+         (model may be infeasible or unbounded - try turning presolve off)
+Best objective 6.736447197231e+01, best bound 6.736506185380e+01, gap 0.0009%

@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+155,Downsview,0,0,0,0,75.78239781310326,698.0319015881432,765.4198578872297,610.8724972260326,757.2285978527281,1.6779999732971191,319,79,14,17,7,14,2
