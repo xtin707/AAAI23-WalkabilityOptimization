@@ -1090,7 +1090,7 @@ def quality_table(results_folder, processed_folder):
     output_df.to_csv(df_filename, index=False)
     print(output_df.to_latex(index=False))
     return
-
+'''
 def hist_distances(data_root, results_folder,processed_folder,plot_folder):
     SMALL_SIZE = 8
     MEDIUM_SIZE = 13
@@ -1142,12 +1142,16 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                 #  MILP
                 if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)):
                     mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
-                    dist_grocery = mip_df["dist_grocery"]
                     choices_dist = [mip_df[str(c) + "_dist_restaurant"] if (str(c) + "_dist_restaurant") in mip_df.columns else L_a[-2] for c in range(10)]
                     dist_school = mip_df["dist_school"]
                     dist_res_1 = list(mip_df["0_dist_restaurant"])
                     dist_res_2 = list(mip_df["1_dist_restaurant"])
-                    dist_healthcare = mip_df["dist_healthcare"]
+                    #dist_healthcare = mip_df["dist_healthcare"]
+                    if "dist_healthcare" in mip_df.columns:
+                        dist_healthcare = mip_df["dist_healthcare"]
+                    else:
+                        print(f"Warning: dist_healthcare missing in {filename}")
+                        continue
 
                 elif os.path.exists(os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)):
                     # if not feasible, use greedy solution 
@@ -1156,9 +1160,14 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
                             index_col=None, header=0)
                         dist_grocery = greedy_df["dist_grocery"]
                         dist_school = greedy_df["dist_school"]
-                        dist_healthcare = greedy_df["dist_healthcare"]
+                        #dist_healthcare = greedy_df["dist_healthcare"]
                         dist_res_1 = list(greedy_df["0_dist_restaurant"])
                         dist_res_2 = list(greedy_df["1_dist_restaurant"])
+                        if "dist_healthcare" in greedy_df.columns:
+                            dist_healthcare = greedy_df["dist_healthcare"]
+                        else:
+                            print(f"Warning: dist_healthcare missing in {filename}")
+                            continue
                 else: 
                     print(f"File not found for NIA {nia}, skipping...")
                     continue
@@ -1251,6 +1260,199 @@ def hist_distances(data_root, results_folder,processed_folder,plot_folder):
             print("max value", L_all_type_names[ind], k, np.max(arr_after))
 
             plt.hist(arr_after, bins,alpha=transp, label='k={}'.format(all_k[ind2]))
+            plt.axvline(arr_after.mean(), color=colors_line[ind2+1], linestyle='solid', linewidth=1.5,label='Mean (k={}): {:.2f}'.format(all_k[ind2],arr_after.mean()))
+            #plt.text(arr_after.mean() * 1.1, max_ylim * 0.9, 'Mean: {:.2f}'.format(arr_after.mean()))
+
+            plt.axvline(np.quantile(arr_after, 0.75), color=colors_line[ind2 + 1], linestyle='dashdot', linewidth=1.5, label='75% (k={}): {:.2f}'.format(all_k[ind2],np.quantile(arr_after, 0.75)))
+            plt.axvline(np.max(arr_after), color=colors_line[ind2 + 1], linestyle=('dotted'), linewidth=1.5, label='Max (k={}): {:.2f}'.format(all_k[ind2], np.max(arr_after)))
+            #plt.text(np.quantile(arr_after, 0.75) * 1.1, max_ylim * 0.9, '75%: {:.2f}'.format(np.quantile(arr_after, 0.75)))
+        plt.legend(loc='upper right')
+        plt.xlabel("Walking Time (Minutes)")
+        #plt.ylabel("Frequency")
+
+        # Ensure the directory exists before saving the plot
+        save_path = os.path.join(plot_folder,"final_eval", L_all_save_names[ind])
+        ensure_directory_exists(os.path.dirname(save_path))
+        plt.savefig(save_path, bbox_inches='tight')
+    return
+'''
+
+def hist_distances(data_root, results_folder, plot_folder):
+
+    D_NIA = ct_nia_mapping(
+        os.path.join(data_root, "Neighbourhood Improvement Areas - 4326",
+         "processed_TSNS 2020 NIA Census Tracts.xlsx")
+    )
+
+    print("multiple depth case")
+
+    # BASELINE (k=0)
+    dist_grocery_before = []
+    dist_res_1_before = []
+    dist_res_2_before = []
+    dist_school_before = []
+    dist_healthcare_before = []
+
+    # AFTER (k > 0)
+    dist_grocery_after = {}
+    dist_res_1_after = {}
+    dist_res_2_after = {}
+    dist_school_after = {}
+    dist_healthcare_after = {}
+
+    all_k = [3]
+    #use = 'mip'
+
+    # Helper function
+    def load_dataframe(nia, k):
+        filename = f"assignment_NIA_{nia}_{k},{k},{k},{k}.csv"
+
+        mip_path = os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)
+        greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
+
+        #if use == 'mip' and os.path.exists(mip_path):
+        #    return pd.read_csv(mip_path), filename, "MIP"
+
+        #el
+        if os.path.exists(greedy_path):
+            return pd.read_csv(greedy_path), filename, "Greedy"
+
+        else:
+            return None, filename, None
+
+    # BUILDING NEW AMENITIES (k=3)
+    for k in all_k:
+        dist_grocery_after[k] = []
+        dist_res_1_after[k] = []
+        dist_res_2_after[k] = []
+        dist_school_after[k] = []
+        dist_healthcare_after[k] = []
+
+        for nia in D_NIA.keys():
+            print(f"[k={k}] NIA:", nia)
+
+            df, filename, method = load_dataframe(nia, k)
+
+            if df is None:
+                print(f"File not found for NIA {nia}, skipping...")
+                continue
+
+            required_cols = [
+                "dist_grocery",
+                "dist_school",
+                "0_dist_restaurant",
+                "1_dist_restaurant",
+                "dist_healthcare"
+            ]
+
+            missing_cols = [col for col in required_cols if col not in df.columns]
+
+            if missing_cols:
+                print(f"⚠️ Missing {missing_cols} in {filename} ({method}), skipping...")
+                continue
+
+            # Extraction
+            dist_grocery = df["dist_grocery"]
+            dist_school = df["dist_school"]
+            dist_healthcare = df["dist_healthcare"]
+            dist_res_1 = df["0_dist_restaurant"]
+            dist_res_2 = df["1_dist_restaurant"]
+
+            # Append
+            dist_grocery_after[k].extend(dist_grocery)
+            dist_school_after[k].extend(dist_school)
+            dist_healthcare_after[k].extend(dist_healthcare)
+            dist_res_1_after[k].extend(dist_res_1)
+            dist_res_2_after[k].extend(dist_res_2)
+
+    # BASELINE (k = 0)
+    k = 0
+
+    for nia in D_NIA.keys():
+        print(f"[k=0] NIA:", nia)
+
+        df, filename, method = load_dataframe(nia, k)
+
+        if df is None:
+            print(f"File not found for NIA {nia}, skipping...")
+            continue
+
+        required_cols = [
+            "dist_grocery",
+            "dist_school",
+            "0_dist_restaurant",
+            "1_dist_restaurant",
+            "dist_healthcare"
+        ]
+
+        missing_cols = [col for col in required_cols if col not in df.columns]
+
+        if missing_cols:
+            print(f"⚠️ Missing {missing_cols} in {filename} ({method}), skipping...")
+            continue
+
+        dist_grocery_before.extend(df["dist_grocery"])
+        dist_school_before.extend(df["dist_school"])
+        dist_healthcare_before.extend(df["dist_healthcare"])
+        dist_res_1_before.extend(df["0_dist_restaurant"])
+        dist_res_2_before.extend(df["1_dist_restaurant"])
+
+    speed = 1.2
+    transp = 0.5
+    colors = ['blue','orange','green']
+    colors_line = ['blue', 'red', 'green']
+
+    bins = np.linspace(0.0, 70.0, 100)
+
+    time_grocery_before = (np.array(dist_grocery_before) /speed) / 60
+    time_res_1_before = (np.array(dist_res_1_before) / speed) / 60
+    time_res_2_before = (np.array(dist_res_2_before) / speed) / 60
+    time_school_before = (np.array(dist_school_before) / speed) / 60
+    time_healthcare_before = (np.array(dist_healthcare_before) / speed) / 60
+
+    time_grocery_after = {}
+    time_res_1_after = {}
+    time_res_2_after = {}
+    time_school_after = {}
+    time_healthcare_after = {}
+
+    for k in all_k:
+        time_grocery_after[k] = (np.array(dist_grocery_after[k]) / speed) / 60
+        time_res_1_after[k] = (np.array(dist_res_1_after[k]) / speed) / 60
+        time_res_2_after[k] = (np.array(dist_res_2_after[k]) / speed) / 60
+        time_school_after[k] = (np.array(dist_school_after[k]) / speed) / 60
+        time_healthcare_after[k] = (np.array(dist_healthcare_after[k]) / speed) / 60
+
+    L_all_before = [time_grocery_before, time_res_1_before, time_res_2_before, time_school_before, time_healthcare_before]
+    L_all_after = [[time_grocery_after[k] for k in all_k], [time_res_1_after[k] for k in all_k], [time_res_2_after[k] for k in all_k], [time_school_after[k] for k in all_k], [time_healthcare_after[k] for k in all_k]]
+    L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png","nearest heathcare.png"]
+    L_all_type_names = ["grocery", "res1", "res2", "school", "healthcare"]
+
+
+    for ind in range(len(L_all_type_names)):
+        print(L_all_type_names[ind])
+        plt.clf()
+        plt.figure(dpi=300)
+        arr_before = L_all_before[ind]
+        arr_before = arr_before[~np.isin(arr_before, [2400/speed/60])]
+        print("max value",L_all_type_names[ind],"before",np.max(arr_before))
+        bins = np.linspace(0.0, int(np.max(arr_before)), 100)
+        plt.hist(arr_before, color=colors[0], bins=bins, alpha=transp, label='k=0')
+
+        plt.axvline(arr_before.mean(), color='blue', linestyle='solid', linewidth=1.5,label='Mean (k=0): {:.2f}'.format(arr_before.mean()))
+        min_ylim, max_ylim = plt.ylim()
+        #plt.text(arr_before.mean() * 1.1, max_ylim * 0.8, 'Mean: {:.2f}'.format(arr_before.mean()))
+        plt.axvline(np.quantile(arr_before, 0.75), color='blue', linestyle='dashdot', linewidth=1.5, label='75% (k=0): {:.2f}'.format(np.quantile(arr_before, 0.75)))
+        plt.axvline(np.max(arr_before), color='blue', linestyle=('dotted'), linewidth=1.5, label='Max: (k=0): {:.2f}'.format(np.max(arr_before)))
+        #plt.text(np.quantile(arr_before, 0.75) * 1.1, max_ylim * 0.9, '75%: {:.2f}'.format(np.quantile(arr_before, 0.75)))
+
+        for ind2 in range(len(all_k)):
+            print(k)
+            arr_after = L_all_after[ind][ind2]
+            arr_after=arr_after[~np.isin(arr_after, [2400/speed/60])]
+            print("max value", L_all_type_names[ind], k, np.max(arr_after))
+
+            plt.hist(arr_after, color=colors[ind2+1], bins=bins, alpha=transp, label='k={}'.format(all_k[ind2]))
             plt.axvline(arr_after.mean(), color=colors_line[ind2+1], linestyle='solid', linewidth=1.5,label='Mean (k={}): {:.2f}'.format(all_k[ind2],arr_after.mean()))
             #plt.text(arr_after.mean() * 1.1, max_ylim * 0.9, 'Mean: {:.2f}'.format(arr_after.mean()))
 
@@ -1395,15 +1597,16 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
             
             #obj = np.nan   ✅ Set a default value to prevent UnboundLocalError
             
-            #  MIP
+            """#  MIP
             if os.path.exists(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename)):
                 mip_df = pd.read_csv(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
                 obj=mip_df["obj"].iloc[0]
             else:
-                # if not feasible, use greedy solution
-                if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename)):
-                    greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename), index_col=None, header=0)
-                    obj=greedy_df["obj"].iloc[0]
+                # if not feasible, use greedy solution"""
+            
+            if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename)):
+                greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename), index_col=None, header=0)
+                obj=greedy_df["obj"].iloc[0]
 
             walk_obj.append(obj)
             ###############
@@ -1767,8 +1970,8 @@ if __name__ == "__main__":
     #preprocessing_folder = "./preprocessing"
     
     #nia_avg_walking_time(data_root,plot_folder,results_folder)
-    #nia_avg_walking_time_2(data_root, plot_folder, results_folder)
-    hist_distances(data_root, results_folder,processed_folder,plot_folder)
+    nia_avg_walking_time_2(data_root, plot_folder, results_folder)
+    #hist_distances(data_root, results_folder, plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
     #quality_table(results_folder, processed_folder)

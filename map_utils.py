@@ -52,12 +52,23 @@ def query_ox(polygons,tags):
     for polygon in polygons:
         # Convert polygon to WGS84 for OSM query
         poly_wgs84 = gpd.GeoSeries([polygon], crs="EPSG:2019").to_crs("EPSG:4326").iloc[0]
-        result = ox.features.features_from_polygon(poly_wgs84, tags)
+        try:
+            result = ox.features.features_from_polygon(poly_wgs84, tags)
+        except ox._errors.InsufficientResponseError:
+            # osmnx raises InsufficientResponseError when there are no features
+            # for a given tag set within the polygon. For our preprocessing, we
+            # treat that case as an empty GeoDataFrame so downstream code can
+            # still save/load the expected pickle files.
+            result = gpd.GeoDataFrame(
+                {"geometry": gpd.GeoSeries([], crs="EPSG:4326")},
+                crs="EPSG:4326",
+            )
         # Always reproject results back to EPSG:2019
+        if getattr(result, "crs", None) is None:
+            # Some osmnx empty results may not carry a CRS; assume WGS84.
+            result = result.set_crs("EPSG:4326", allow_override=True)
         result = result.to_crs("EPSG:2019")
         frames.append(result) #['unique_id', 'osmid', 'element_type', 'building', 'geometry']
-    result = pd.concat(frames,ignore_index=True)
-
     return pd.concat(frames, ignore_index=True)
 
 def centroid(item, value):

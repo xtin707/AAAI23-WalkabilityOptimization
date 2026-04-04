@@ -249,7 +249,28 @@ def greedy_multiple_depth(df_from,df_to,grocery_df, restaurant_df, school_df, he
     d_school = np.amin(mat_school, axis=1)
     d_healthcare = np.amin(mat_healthcare, axis=1)
 
-    return score_obj, [np.mean(d_grocery), list(np.mean(d_res,axis=0)), np.mean(d_school), np.mean(d_healthcare)], (et - st), None, allocated_D, None, num_residents, num_allocation, [num_cur_grocery, num_cur_restaurant, num_cur_school, num_cur_healthcare], None
+    # Build the same per-resident distance structure expected by `hist_distances()`.
+    # NOTE: `hist_distances()` reads only the 1st and 2nd nearest restaurants per resident.
+    assigned_D = {
+        "dist_grocery": d_grocery,
+        "dist_school": d_school,
+        "dist_healthcare": d_healthcare,
+        "0_dist_restaurant": d_res[:, 0],
+        "1_dist_restaurant": d_res[:, 1],
+    }
+
+    return (
+        score_obj,
+        [np.mean(d_grocery), list(np.mean(d_res, axis=0)), np.mean(d_school), np.mean(d_healthcare)],
+        (et - st),
+        None,
+        allocated_D,
+        assigned_D,
+        num_residents,
+        num_allocation,
+        [num_cur_grocery, num_cur_restaurant, num_cur_school, num_cur_healthcare],
+        None,
+    )
 
 
 def greedy_multiple(df_from,df_to,grocery_df, restaurant_df, school_df, healthcare_df, SP_matrix, k_array):

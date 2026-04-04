@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+44,,3,3,3,3,93.76422575058672,341.44598530340295,"[309.05411261952435, 549.454631693441, 722.1329869811016, 712.7918134400189, 1092.8385641640075, 1016.8692661535212, 985.8577518535411, 984.2579552926308, 2000.0, 2000.0]",302.72280764711684,82.61615361016585,,65,9.0,,,,,

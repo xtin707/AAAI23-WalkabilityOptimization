@@ -169,7 +169,7 @@ if __name__ == "__main__":
                 assigned_D = get_nearest(residentials_df, parking_df, grocery_df, restaurant_df, school_df, healthcare_df, D)
 
         else:
-            print("choose a model name - allowed: OptMultiple, OptMultipleDepth, GreedyMultiple, GreedyMultipleLazy, GreedyMultipleDepth")
+            print("choose a model name - allowed: OptMultiple, OptMultipleDepth, GreedyMultiple, GreedyMultipleDepth")
 
         if 'Greedy' in args.model:
             # If greedy model did not populate assignment (common case)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
                 )
                 
         # saving & plotting 
-        if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultipleDepth','GreedyMultiple','GreedyMultipleLazy']:
+        if args.model in ['OptMultiple','OptMultipleDepth','GreedyMultipleDepth','GreedyMultiple']:
             if args.k_array != '0,0,0,0' and args.k_array is not None:
                 k_name = args.k_array
                 allocated_f_name = os.path.join(sol_folder, "allocation_NIA_%s_%s.pkl" % (nia_id, k_name))
