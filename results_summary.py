@@ -1969,9 +1969,9 @@ if __name__ == "__main__":
     processed_folder= "processed_results"
     #preprocessing_folder = "./preprocessing"
     
-    #nia_avg_walking_time(data_root,plot_folder,results_folder)
+    nia_avg_walking_time(data_root,plot_folder,results_folder)
     nia_avg_walking_time_2(data_root, plot_folder, results_folder)
-    #hist_distances(data_root, results_folder, plot_folder)
+    hist_distances(data_root, results_folder, plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
     #quality_table(results_folder, processed_folder)
