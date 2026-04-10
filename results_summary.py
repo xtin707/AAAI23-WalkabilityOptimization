@@ -148,239 +148,21 @@ def all_instances_obj(data_root, results_folder,processed_folder):
     INCLUDE_BP=False
     D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
-    # opt single
-    print("single case")
-    amenities = ["grocery", "restaurant", "school"]
-    for amenity in amenities:
-        L_nia = []
-        L_mip_obj = []
-        L_cp_obj = []
-        L_greedy_obj = []
-        if INCLUDE_BP:
-            L_mip_bp_obj = []
-            L_cp_bp_obj = []
-        L_k = []
-        L_mip_status = []
-        L_cp_status = []
-
-        for nia in list(D_NIA.keys()):
-            print("nia:",nia)
-            for k in range(1,10):
-                filename = "assignment_NIA_%s_%s_%s.csv" % (nia,k,amenity)
-
-                L_nia.append(nia)
-                L_k.append(k)
-                #  MIP
-                if os.path.exists(os.path.join(results_folder,"sol","OptSingle_False_0",filename)):
-                    mip_df = pd.read_csv(os.path.join(results_folder,"sol","OptSingle_False_0",filename), index_col=None, header=0)
-                    scores = dist_to_score(np.array(mip_df["dist"]), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_mip_obj.append(score_obj)
-                    #L_mip_status.append(mip_df["model_status"])
-                else:
-                    L_mip_obj.append(None)
-                    #L_mip_status.append("null")
-                # CP
-                if os.path.exists(os.path.join(results_folder, "sol", "OptSingleCP_False_0", filename)):
-                    cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptSingleCP_False_0", filename),index_col=None, header=0)
-                    scores = dist_to_score(np.array(cp_df["dist"]), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_cp_obj.append(score_obj)
-                    #L_cp_status.append(cp_df["model_status"])
-                else:
-                    L_cp_obj.append(None)
-                    #L_cp_status.append("null")
-
-                # Greedy
-                if os.path.exists(os.path.join(results_folder, "summary", "GreedySingle_False_0", "NIA_%s_%s_%s.csv" % (nia,k,amenity))):
-                    greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedySingle_False_0", "NIA_%s_%s_%s.csv" % (nia,k,amenity)), index_col=None,header=0)
-                    L_greedy_obj.append(greedy_df["obj"].values[0])
-                else:
-                    L_greedy_obj.append(None)
-
-        results_D = { "nia":L_nia, "k": L_k ,"mip":L_mip_obj,"cp":L_cp_obj,"greedy":L_greedy_obj,}
-        df_filename = os.path.join(processed_folder, "single_%s.csv" % (amenity))
-        summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp", "greedy"]].max(axis=1)
-        summary_df.to_csv(df_filename,index=False)
-
-    # opt single depth
-    print("single depth case")
-    amenities = ["restaurant"]
-    for amenity in amenities:
-        L_nia = []
-        L_mip_obj = []
-        L_cp_obj = []
-        L_greedy_obj = []
-        if INCLUDE_BP:
-            L_mip_bp_obj = []
-            L_cp_bp_obj = []
-        L_k = []
-        L_mip_status = []
-        L_cp_status = []
-
-        for nia in list(D_NIA.keys()):
-            print("nia:", nia)
-            for k in range(1,10):
-                filename = "assignment_NIA_%s_%s_%s.csv" % (nia, k, amenity)
-
-                L_nia.append(nia)
-                L_k.append(k)
-                #  MIP
-                if os.path.exists(os.path.join(results_folder, "sol", "OptSingleDepth_False_0", filename)):
-                    mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptSingleDepth_False_0", filename),index_col=None, header=0)
-                    choices_dist = [mip_df[str(c)+"_dist"] if (str(c)+"_dist") in mip_df.columns else L_a[-2] for c in range(10)]
-                    choices_dist = np.array(choices_dist)
-                    weighted_choices = np.dot(np.array(choice_weights), choices_dist)
-                    scores = dist_to_score(np.array(weighted_choices), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_mip_obj.append(score_obj)
-                    #L_mip_status.append(mip_df["model_status"])
-                else:
-                    L_mip_obj.append(None)
-                    #L_mip_status.append("null")
-                    # CP
-                if os.path.exists(os.path.join(results_folder, "sol", "OptSingleDepthCP_False_0", filename)):
-                    cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptSingleDepthCP_False_0", filename),index_col=None, header=0)
-                    choices_dist = [cp_df[str(c) + "_dist"] if (str(c) + "_dist") in cp_df.columns else L_a[-2] for c in range(10)]
-                    choices_dist = np.array(choices_dist)
-                    weighted_choices = np.dot(np.array(choice_weights), choices_dist)
-                    scores = dist_to_score(np.array(weighted_choices), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_cp_obj.append(score_obj)
-                    #L_cp_status.append(cp_df["model_status"])
-                else:
-                    L_cp_obj.append(None)
-                    #L_cp_status.append("null")
-
-                # Greedy
-                if os.path.exists(os.path.join(results_folder, "summary", "GreedySingleDepth_False_0", "NIA_%s_%s_%s.csv" % (nia,k,amenity))):
-                    greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedySingleDepth_False_0", "NIA_%s_%s_%s.csv" % (nia,k,amenity)),index_col=None, header=0)
-                    L_greedy_obj.append(greedy_df["obj"].values[0])
-                else:
-                    L_greedy_obj.append(None)
-
-        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "cp": L_cp_obj, "greedy": L_greedy_obj }
-        df_filename = os.path.join(processed_folder, "single_depth_%s.csv" % (amenity))
-        summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp", "greedy"]].max(axis=1)
-        summary_df.to_csv(df_filename, index=False)
-
-    # opt multiple
-    print("multiple case")
-    L_nia = []
-    L_mip_obj = []
-    L_cp_obj = []
-    L_greedy_obj = []
-    if INCLUDE_BP:
-        L_mip_bp_obj = []
-    L_k = []
-    L_mip_status = []
-    L_cp_status = []
-
-    for nia in list(D_NIA.keys()):
-        print("nia:", nia)
-        for k in range(1,10):
-            filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)
-
-            L_nia.append(nia)
-            L_k.append(k)
-            #  MIP
-            if os.path.exists(os.path.join(results_folder, "sol", "OptMultiple_False_0", filename)):
-                mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultiple_False_0", filename),index_col=None, header=0)
-                dist_grocery = mip_df["dist_grocery"]
-                dist_restaurant = mip_df["dist_restaurant"]
-                dist_school = mip_df["dist_school"]
-                multiple_dist = np.array([dist_grocery, dist_restaurant, dist_school])
-                weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-                scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-                score_obj = np.mean(scores)
-                L_mip_obj.append(score_obj)
-                #L_mip_status.append(mip_df["model_status"])
-            else:
-                L_mip_obj.append(None)
-                #L_mip_status.append("null")
-            if INCLUDE_BP:
-
-                #  MIP - branch priority
-                if os.path.exists(os.path.join(results_folder, "sol", "OptMultiple_True_0", filename)):
-                    mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultiple_True_0", filename),
-                                         index_col=None, header=0)
-                    dist_grocery = mip_df["dist_grocery"]
-                    dist_restaurant = mip_df["dist_restaurant"]
-                    dist_school = mip_df["dist_school"]
-                    multiple_dist = np.array([dist_grocery, dist_restaurant, dist_school])
-                    weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-                    scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_mip_bp_obj.append(score_obj)
-                    # L_mip_status.append(mip_df["model_status"])
-                else:
-                    L_mip_bp_obj.append(None)
-                    # L_mip_status.append("null")
-            # CP
-            if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleCP_False_0", filename)):
-                cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleCP_False_0", filename),index_col=None, header=0)
-                dist_grocery = cp_df["dist_grocery"]
-                dist_restaurant = cp_df["dist_restaurant"]
-                dist_school = cp_df["dist_school"]
-                multiple_dist = np.array([dist_grocery, dist_restaurant, dist_school])
-                weighted_dist = np.dot(np.array(weights_array), multiple_dist)
-                scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-                score_obj = np.mean(scores)
-                L_cp_obj.append(score_obj)
-                #L_cp_status.append(cp_df["model_status"])
-            else:
-                L_cp_obj.append(None)
-                #L_cp_status.append("null")
-
-            # Greedy
-            if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k))):
-                #greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultiple_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)),index_col=None, header=0)
-                file_path = os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0",
-                         "NIA_%s_%s,%s,%s.csv" % (nia, k, k, k))
-                if os.path.exists(file_path):
-                    greedy_df = pd.read_csv(file_path, index_col=None, header=0)
-                    L_greedy_obj.append(greedy_df["obj"].values[0])
-                else:
-                    print(f"Skipping NIA {nia} with k={k} — file not found.")
-                               
-            else:
-                L_greedy_obj.append(None)
-
-
-    if INCLUDE_BP:
-
-        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "cp": L_cp_obj, "greedy": L_greedy_obj,"mip-bp": L_mip_bp_obj}
-        df_filename = os.path.join(processed_folder, "multiple.csv")
-        summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp", "greedy","mip-bp"]].max(axis=1)
-        summary_df.to_csv(df_filename, index=False)
-    else:
-        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "cp": L_cp_obj, "greedy": L_greedy_obj}
-        df_filename = os.path.join(processed_folder, "multiple.csv" )
-        summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp", "greedy"]].max(axis=1)
-        summary_df.to_csv(df_filename, index=False)
-
-
     # opt multiple depth
     print("multiple depth case")
     L_nia = []
     L_mip_obj = []
-    L_cp_obj = []
+
     L_greedy_obj = []
     if INCLUDE_BP:
         L_mip_bp_obj = []
-        L_cp_bp_obj = []
+ 
     L_k = []
     L_mip_status = []
-    L_cp_status = []
-
     for nia in list(D_NIA.keys()):
         print("nia:", nia)
-        for k in range(1,10):
-            filename = "assignment_NIA_%s_%s,%s,%s.csv" % (nia, k, k, k)
+        for k in range(1,3):
+            filename = "assignment_NIA_%s_%s,%s,%s,%s.csv" % (nia, k, k, k, k)
 
             L_nia.append(nia)
             L_k.append(k)
@@ -420,43 +202,6 @@ def all_instances_obj(data_root, results_folder,processed_folder):
                     L_mip_bp_obj.append(None)
                     # L_mip_status.append("null")
 
-            # CP
-            if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepthCP_False_0", filename)):
-                cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepthCP_False_0", filename), index_col=None, header=0)
-                dist_grocery = cp_df["dist_grocery"]
-                choices_dist = [cp_df[str(c) + "_dist_restaurant"] if (str(c) + "_dist_restaurant") in mip_df.columns else L_a[-2] for c in range(10)]
-                dist_school = cp_df["dist_school"]
-                multiple_dist = np.array([dist_grocery] + choices_dist + [dist_school])
-                weighted_dist = np.dot(np.array(weights_array_multi), multiple_dist)
-                scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-                score_obj = np.mean(scores)
-                L_cp_obj.append(score_obj)
-                #L_cp_status.append(cp_df["model_status"])
-            else:
-                L_cp_obj.append(None)
-                #L_cp_status.append("null")
-
-            if INCLUDE_BP:
-
-                # CP - branch priority
-                if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepthCP_True_0", filename)):
-                    cp_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepthCP_True_0", filename),
-                                        index_col=None, header=0)
-                    dist_grocery = cp_df["dist_grocery"]
-                    choices_dist = [
-                        cp_df[str(c) + "_dist_restaurant"] if (str(c) + "_dist_restaurant") in mip_df.columns else L_a[
-                            -2] for c in range(10)]
-                    dist_school = cp_df["dist_school"]
-                    multiple_dist = np.array([dist_grocery] + choices_dist + [dist_school])
-                    weighted_dist = np.dot(np.array(weights_array_multi), multiple_dist)
-                    scores = dist_to_score(np.array(weighted_dist), L_a, L_f_a)
-                    score_obj = np.mean(scores)
-                    L_cp_bp_obj.append(score_obj)
-                    # L_cp_status.append(cp_df["model_status"])
-                else:
-                    L_cp_bp_obj.append(None)
-                    # L_cp_status.append("null")
-
             # Greedy
             if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k))):
                 greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)),index_col=None, header=0)
@@ -468,17 +213,17 @@ def all_instances_obj(data_root, results_folder,processed_folder):
 
     if INCLUDE_BP:
 
-        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "cp": L_cp_obj, "greedy": L_greedy_obj,"mip-bp": L_mip_bp_obj, "cp-bp": L_cp_bp_obj}
+        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "greedy": L_greedy_obj,"mip-bp": L_mip_bp_obj}
         df_filename = os.path.join(processed_folder, "multiple_depth.csv")
         summary_df = pd.DataFrame(results_D)
         summary_df["best"] = summary_df[["mip", "cp", "greedy","mip-bp","cp-bp"]].max(axis=1)
         summary_df.to_csv(df_filename, index=False)
     else:
 
-        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "cp": L_cp_obj, "greedy": L_greedy_obj}
+        results_D = {"nia": L_nia, "k": L_k, "mip": L_mip_obj, "greedy": L_greedy_obj}
         df_filename = os.path.join(processed_folder, "multiple_depth.csv")
         summary_df = pd.DataFrame(results_D)
-        summary_df["best"] = summary_df[["mip", "cp","greedy"]].max(axis=1)
+        summary_df["best"] = summary_df[["mip","greedy"]].max(axis=1)
         summary_df.to_csv(df_filename, index=False)
     return
 
@@ -571,7 +316,7 @@ def plot_quality(processed_folder):
     L_gap_greedy = []
     all_obj_df = pd.read_csv(os.path.join(processed_folder, "multiple.csv"), index_col=None, header=0)
     for nia in list(D_NIA.keys()):
-        results_df = get_results_df(results_folder, "OptMultiple_False_0")
+        results_df = get_results_df(results_folder, "OptMultipleDepth_False_0")
         results_df = results_df[results_df["nia_id"] == nia]
         obj_df = all_obj_df[all_obj_df["nia"] == nia]
 
@@ -638,6 +383,8 @@ def plot_quality(processed_folder):
 
 def network_charac(data_root, results_folder,processed_folder):
 
+    # Ensure the processed output directory exists.
+    ensure_directory_exists(processed_folder)
 
     D_NIA = ct_nia_mapping( os.path.join(data_root, "Neighbourhood Improvement Areas - 4326", "processed_TSNS 2020 NIA Census Tracts.xlsx"))
 
@@ -649,24 +396,57 @@ def network_charac(data_root, results_folder,processed_folder):
     L_num_grocery = []
     L_num_res = []
     L_num_school = []
+    L_num_healthcare = []
 
     for nia in list(D_NIA.keys()):
         print("nia:",nia)
 
-        filename = "NIA_%s_%s,%s,%s.csv" % (nia,1,1,1)
+        # Prefer k=3 summaries, but fall back if missing (per-NIA robustness).
+        k_candidates = [3, 1]
+        filename = None
+        for k in k_candidates:
+            candidate = "NIA_%s_%s,%s,%s,%s_summary.csv" % (nia, k, k, k, k)
+            candidate_path = os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", candidate)
+            if os.path.exists(candidate_path):
+                filename = candidate
+                break
+        if filename is None:
+            print(
+                f"Warning: no summary CSV found for NIA {nia} under "
+                f"{os.path.join(results_folder, 'summary', 'OptMultipleDepth_False_0')} "
+                f"for k in {k_candidates}. Skipping this NIA."
+            )
+            continue
         L_nia.append(nia)
 
         #  MIP
 
-        mip_df = pd.read_csv(os.path.join(results_folder,"summary","OptMultiple_False_0",filename), index_col=None, header=0)
+        mip_df = pd.read_csv(os.path.join(results_folder,"summary","OptMultipleDepth_False_0",filename), index_col=None, header=0)
 
         L_m.append(mip_df["num_parking"][0])
         L_n.append(mip_df["num_res"][0])
-        L_num_grocery.append(mip_df["num_existing_L_grocery"][0])
-        L_num_res.append(mip_df["num_existing_L_restaurant"][0])
-        L_num_school.append(mip_df["num_existing_L_school"][0])
+        # Column names vary across result CSV variants.
+        # Prefer legacy "num_existing_L_*" names; fall back to the current "num_cur_*" names.
+        def _get_first_present(df, candidates):
+            for col in candidates:
+                if col in df.columns:
+                    return df[col].iloc[0]
+            raise KeyError(f"None of the columns exist: {candidates}")
 
-    results_D = { "nia":L_nia, "n": L_n ,"m":L_m,"grocery":L_num_grocery,"res":L_num_res,"school":L_num_school}
+        L_num_grocery.append(_get_first_present(mip_df, ["num_existing_L_grocery", "num_cur_grocery"]))
+        L_num_res.append(_get_first_present(mip_df, ["num_existing_L_restaurant", "num_cur_restaurant"]))
+        L_num_school.append(_get_first_present(mip_df, ["num_existing_L_school", "num_cur_school"]))
+        L_num_healthcare.append(_get_first_present(mip_df, ["num_existing_L_healthcare", "num_cur_healthcare"]))
+
+    results_D = {
+        "nia": L_nia,
+        "n": L_n,
+        "m": L_m,
+        "grocery": L_num_grocery,
+        "res": L_num_res,
+        "school": L_num_school,
+        "healthcare": L_num_healthcare,
+    }
     df_filename = os.path.join(processed_folder, "nia_summary.csv")
     summary_df = pd.DataFrame(results_D)
     summary_df["m+n"]=summary_df["m"]+summary_df["n"]
@@ -686,9 +466,9 @@ def network_charac(data_root, results_folder,processed_folder):
 
     output_D = {}
 
-    model = "OptMultiple_False_0"
+    model = "OptMultipleDepth_False_0"
     group_thres = [0, 200, 400, 600, 2000]
-
+    #group_thres = [0,400,800,1200,1600,2000,2400]
 
     output_D["group"] = []
     output_D["num_nia"] = []
@@ -696,9 +476,23 @@ def network_charac(data_root, results_folder,processed_folder):
     output_D["avg grocery"] = []
     output_D["avg res"] = []
     output_D["avg school"] = []
+    output_D["avg healthcare"] = []
 
     results_df = get_results_df(results_folder, model)
-    results_df = results_df[(results_df["k_L_grocery"] > 0) & (results_df["k_L_restaurant"] > 0) & (results_df["k_L_school"] > 0)]
+    required_cols = {"k_L_grocery", "k_L_restaurant", "k_L_school", "k_L_healthcare"}
+    missing = required_cols.difference(results_df.columns)
+    if missing:
+        print(
+            f"Warning: skipping instances_summary.csv because {model} results are missing columns: "
+            f"{sorted(missing)}"
+        )
+        return
+    results_df = results_df[
+        (results_df["k_L_grocery"] > 0)
+        & (results_df["k_L_restaurant"] > 0)
+        & (results_df["k_L_school"] > 0)
+        & (results_df["k_L_healthcare"] > 0)
+    ]
     results_df["m+n"] = results_df["num_res"] + results_df["num_parking"]
 
     for p in range(len(group_thres) - 1):
@@ -714,17 +508,18 @@ def network_charac(data_root, results_folder,processed_folder):
         output_D["avg grocery"].append(group_df["num_existing_L_grocery"].mean())
         output_D["avg res"].append(group_df["num_existing_L_restaurant"].mean())
         output_D["avg school"].append(group_df["num_existing_L_school"].mean())
+        output_D["avg healthcare"].append(group_df["num_existing_L_healthcare"].mean())
 
     df_filename = os.path.join(processed_folder, "instances_summary.csv")
     output_df = pd.DataFrame(output_D)
     output_df["avg grocery"] = output_df["avg grocery"].map('{:.2f}'.format)
     output_df["avg res"] = output_df["avg res"].map('{:.2f}'.format)
     output_df["avg school"] = output_df["avg school"].map('{:.2f}'.format)
+    output_df["avg healthcare"] = output_df["avg healthcare"].map('{:.2f}'.format)
     output_df.to_csv(df_filename, index=False)
     print(output_df.to_latex(index=False))
     return
 
-    return
 
 def plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name):
     plt.figure(dpi=300)
@@ -739,6 +534,8 @@ def plot_time_by_group_multiple(results_folder, plot_folder, models, display_nam
     plt.clf()
 
     group_thres = [0,200,400,600,1115]
+    
+    
 
     def define_box_properties(plot_name, color_code, label):
 
@@ -839,7 +636,8 @@ def quality_table_by_group_multiple(processed_folder):
     L_greedy_depth = []
 
     group_thres = [0, 200, 400, 600, 2000]
-    groups_name = ['[0,200)', '[200,400)', '[400,600)]', '[[600,inf)]']
+    #group_thres = [0,400,800,1200,1600,2000,2400]
+    groups_name = ['[0,400)', '[400,800)', '[800,1200)]', '[1200,1600)]', '[1600,2000)]', '[[2000,inf)]']
 
     for p in range(len(group_thres) - 1):
         group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
@@ -936,10 +734,11 @@ def opt_feas_multiple(results_folder, processed_folder):
 
     output_D = {}
 
-    models = ["OptMultiple_False_0","OptMultipleCP_False_0","OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0"]
-    display_names = ["MILP","CP","MILP,depth","CP,depth"]
+    models = ["OptMultipleDepth_False_0"]
+    display_names = ["MILP,depth"]
 
-    group_thres = [0,200,400,600,2000]
+    #group_thres = [0,400,800,1200,1600,2000,2400]
+    group_thres = [0, 200, 400, 600, 2000]
 
     for i in range(len(models)):
 
@@ -950,7 +749,7 @@ def opt_feas_multiple(results_folder, processed_folder):
         output_D[display_name + " feas"] = []
 
         results_df = get_results_df(results_folder, model_name)
-        results_df = results_df[(results_df["k_L_grocery"]>0) & (results_df["k_L_restaurant"]>0) & (results_df["k_L_school"]>0)]
+        results_df = results_df[(results_df["k_L_grocery"]>0) & (results_df["k_L_restaurant"]>0) & (results_df["k_L_school"]>0) & (results_df["k_L_healthcare"]>0)]
         results_df["m+n"]=results_df["num_res"]+results_df["num_parking"]
 
         for p in range(len(group_thres)-1):
@@ -971,20 +770,14 @@ def opt_feas_multiple(results_folder, processed_folder):
     return output_df
 
 def quality_table(results_folder, processed_folder):
-    INCLUDE_BP=False
+    # Ensure the processed output directory exists.
+    ensure_directory_exists(processed_folder)
+    #group_thres = [0,400,800,1200,1600,2000,2400]
     group_thres = [0, 200, 400, 600, 2000]
     groups_name = ['1', '2', '3', '4']
-    if INCLUDE_BP:
-
-        models_name_no_depth = ["mip","cp","greedy","mip-bp"]
-        models_name_depth = ["mip", "cp", "greedy", "mip-bp","cp-bp"]
-        models_save_name_no_depth = ["OptMultiple_False_0","OptMultipleCP_False_0","GreedyMultiple_False_0","OptMultiple_True_0"]
-        models_save_name_depth = ["OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0","GreedyMultipleDepth_False_0","OptMultipleDepth_True_0", "OptMultipleDepthCP_True_0"]
-    else:
-        models_name_no_depth = ["mip", "cp", "greedy"]
-        models_name_depth = ["mip", "cp", "greedy"]
-        models_save_name_no_depth = ["OptMultiple_False_0", "OptMultipleCP_False_0", "GreedyMultiple_False_0"]
-        models_save_name_depth = ["OptMultipleDepth_False_0", "OptMultipleDepthCP_False_0", "GreedyMultipleDepth_False_0"]
+    # Only report depth-of-choice case for the requested methods.
+    models_name_depth = ["mip", "greedy"]
+    models_save_name_depth = ["OptMultipleDepth_False_0", "GreedyMultipleDepth_False_0"]
 
     num_nia = []
     num_ins = []
@@ -992,13 +785,7 @@ def quality_table(results_folder, processed_folder):
     L_group = []
     L_model = []
 
-    L_no_depth_mre = []
-    L_no_depth_opt = []
-    L_no_depth_feas = []
-
     L_depth_mre = []
-    L_depth_opt = []
-    L_depth_feas = []
 
     summary_filename = os.path.join(processed_folder, "nia_summary.csv")
     summary_df = pd.read_csv(summary_filename)
@@ -1011,80 +798,24 @@ def quality_table(results_folder, processed_folder):
     output_df = pd.DataFrame(output_D)
     output_df.to_csv(os.path.join(processed_folder,"groups_summary.csv"), index=False)
 
-    # no depth
-    all_obj_df = pd.read_csv(os.path.join(processed_folder, "multiple.csv"), index_col=None, header=0)
-    for p in range(len(group_thres) - 1):
-        group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
-        obj_group_df = all_obj_df[all_obj_df["nia"].isin(group_df['nia'])]
-
-        for m in range(len(models_name_no_depth)):
-            # group column
-            L_group.append(groups_name[p])
-            if not INCLUDE_BP:
-                # models column
-                L_model.append(models_name_no_depth[m])
-            # MRE column, no depth
-            L_no_depth_mre.append(100 * np.mean((obj_group_df['best'] - obj_group_df[models_name_no_depth[m]]) / obj_group_df['best']))
-
-            results_df = get_results_df(results_folder, models_save_name_no_depth[m])
-            results_df = results_df[(results_df["k_L_grocery"] > 0) & (results_df["k_L_restaurant"] > 0) & (results_df["k_L_school"] > 0)]
-            results_df["m+n"] = results_df["num_res"] + results_df["num_parking"]
-            results_group_df = results_df[(results_df["m+n"] >= group_thres[p]) & (results_df["m+n"] < group_thres[p + 1])]
-            num_feas = len(results_group_df)
-            if "CP" in models_save_name_no_depth[m]:
-                num_opt = len(results_group_df[results_group_df["model_status"] == "Optimal"])
-            elif "Greedy" in models_save_name_no_depth[m]:
-                #num_opt = (obj_group_df['greedy']==obj_group_df['best']).sum()
-                num_opt = "N/A"
-            else:
-                num_opt = len(results_group_df[results_group_df["model_status"].astype(int) == 2])
-
-            # opt column, no depth
-            L_no_depth_opt.append(num_opt)
-            # feas column, no depth
-            L_no_depth_feas.append(num_feas)
-
     # depth of choice
     all_obj_df = pd.read_csv(os.path.join(processed_folder, "multiple_depth.csv"), index_col=None, header=0)
     for p in range(len(group_thres) - 1):
         group_df = summary_df[(summary_df["m+n"] >= group_thres[p]) & (summary_df["m+n"] < group_thres[p + 1])]
         obj_group_df = all_obj_df[all_obj_df["nia"].isin(group_df['nia'])]
         for m in range(len(models_name_depth)):
-            # MRE column, depth
-            if INCLUDE_BP:
-                L_model.append(models_name_depth[m])
+            # group + method columns
+            L_group.append(groups_name[p])
+            L_model.append(models_name_depth[m])
+            # MRE column (depth)
             L_depth_mre.append(100 * np.mean((obj_group_df['best'] - obj_group_df[models_name_depth[m]]) / obj_group_df['best']))
+            # Keep the model status parsing out of this table per request.
+            # (If needed, feasibility/optimality counts can be re-added later.)
 
-            results_df = get_results_df(results_folder, models_save_name_depth[m])
-            results_df = results_df[(results_df["k_L_grocery"] > 0) & (results_df["k_L_restaurant"] > 0) & (results_df["k_L_school"] > 0)]
-            results_df["m+n"] = results_df["num_res"] + results_df["num_parking"]
-            results_group_df = results_df[(results_df["m+n"] >= group_thres[p]) & (results_df["m+n"] < group_thres[p + 1])]
-            num_feas = len(results_group_df)
-            if "CP" in models_save_name_depth[m]:
-                num_opt = len(results_group_df[results_group_df["model_status"] == "Optimal"])
-            elif "Greedy" in models_save_name_depth[m]:
-                #num_opt = (obj_group_df['greedy']==obj_group_df['best']).sum()
-                num_opt = "N/A"
-            else:
-                num_opt = len(results_group_df[results_group_df["model_status"].astype(int) == 2])
-
-            # opt column, depth
-            L_depth_opt.append(num_opt)
-            # feas column, depth
-            L_depth_feas.append(num_feas)
-    if INCLUDE_BP:
-
-        output_D_temp = {"group": L_group, "method": L_model,
-                    "MRE,d": L_depth_mre, "feas, d": L_depth_feas, "opt, d": L_depth_opt}
-        output_df_temp = pd.DataFrame(output_D_temp)
-
-    output_D = {"group": L_group,"method":L_model,
-                "MRE,no d": L_no_depth_mre, "feas, no d": L_no_depth_feas, "opt, no d": L_no_depth_opt,
-                "MRE,d": L_depth_mre, "feas, d": L_depth_feas, "opt, d": L_depth_opt}
+    output_D = {"group": L_group, "method": L_model, "MRE,d": L_depth_mre}
     output_df = pd.DataFrame(output_D)
 
     # output format
-    output_df["MRE,no d"] = output_df["MRE,no d"].map('{:.2f}'.format)
     output_df["MRE,d"] = output_df["MRE,d"].map('{:.2f}'.format)
     df_filename = os.path.join(processed_folder, "quality table.csv")
     output_df.to_csv(df_filename, index=False)
@@ -1301,7 +1032,7 @@ def hist_distances(data_root, results_folder, plot_folder):
     dist_healthcare_after = {}
 
     all_k = [3]
-    #use = 'mip'
+    use = 'mip'
 
     # Helper function
     def load_dataframe(nia, k):
@@ -1310,11 +1041,10 @@ def hist_distances(data_root, results_folder, plot_folder):
         mip_path = os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)
         greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
 
-        #if use == 'mip' and os.path.exists(mip_path):
-        #    return pd.read_csv(mip_path), filename, "MIP"
+        if use == 'mip' and os.path.exists(mip_path):
+            return pd.read_csv(mip_path), filename, "MIP"
 
-        #el
-        if os.path.exists(greedy_path):
+        elif os.path.exists(greedy_path):
             return pd.read_csv(greedy_path), filename, "Greedy"
 
         else:
@@ -1425,6 +1155,8 @@ def hist_distances(data_root, results_folder, plot_folder):
 
     L_all_before = [time_grocery_before, time_res_1_before, time_res_2_before, time_school_before, time_healthcare_before]
     L_all_after = [[time_grocery_after[k] for k in all_k], [time_res_1_after[k] for k in all_k], [time_res_2_after[k] for k in all_k], [time_school_after[k] for k in all_k], [time_healthcare_after[k] for k in all_k]]
+    # MIP Filename: L_all_save_names = ["nearest grocery_MILP.png","nearest 1 res_MILP.png","nearest 2 res_MILP.png","nearest school_MILP.png","nearest heathcare_MILP.png"]
+    # Greedy Filename: L_all_save_names = ["nearest grocery_greedy.png","nearest 1 res_greedy.png","nearest 2 res_greedy.png","nearest school_greedy.png","nearest heathcare_greedy.png"]
     L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png","nearest heathcare.png"]
     L_all_type_names = ["grocery", "res1", "res2", "school", "healthcare"]
 
@@ -1597,16 +1329,15 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
             
             #obj = np.nan   ✅ Set a default value to prevent UnboundLocalError
             
-            """#  MIP
+            #  MIP
             if os.path.exists(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename)):
                 mip_df = pd.read_csv(os.path.join(results_folder, "summary", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
                 obj=mip_df["obj"].iloc[0]
             else:
-                # if not feasible, use greedy solution"""
-            
-            if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename)):
-                greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename), index_col=None, header=0)
-                obj=greedy_df["obj"].iloc[0]
+                # if not feasible, use greedy solution
+                if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename)):
+                    greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", filename), index_col=None, header=0)
+                    obj=greedy_df["obj"].iloc[0]
 
             walk_obj.append(obj)
             ###############
@@ -1666,8 +1397,8 @@ def nia_avg_walking_time_2(data_root,plot_folder,results_folder):
     # Ensure the directory exists before saving the plot
     save_dir = os.path.join(plot_folder, "final_eval")
     ensure_directory_exists(save_dir)  
-    plt.savefig(os.path.join(save_dir, "score_delta_k3.pdf"))
-    plt.savefig(os.path.join(save_dir, "score_delta_k3.png"))
+    plt.savefig(os.path.join(save_dir, "score_delta_k3_MILP.pdf"))
+    plt.savefig(os.path.join(save_dir, "score_delta_k3_MILP.png"))
     
     return
 
@@ -1969,10 +1700,13 @@ if __name__ == "__main__":
     processed_folder= "processed_results"
     #preprocessing_folder = "./preprocessing"
     
-    nia_avg_walking_time(data_root,plot_folder,results_folder)
-    nia_avg_walking_time_2(data_root, plot_folder, results_folder)
+    #nia_avg_walking_time(data_root,plot_folder,results_folder)
+    #nia_avg_walking_time_2(data_root, plot_folder, results_folder)
     hist_distances(data_root, results_folder, plot_folder)
     #avg_obj_vs_k_multi(results_folder, plot_folder)
     #plot_time_by_group_multiple(results_folder, plot_folder, models, display_names, save_name)
+    
+    #all_instances_obj(data_root, results_folder,processed_folder)
+    #network_charac(data_root, results_folder,processed_folder)
     #quality_table(results_folder, processed_folder)
     #plot_walkability_comparison(data_root, plot_folder, results_folder)
