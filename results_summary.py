@@ -166,6 +166,7 @@ def all_instances_obj(data_root, results_folder,processed_folder):
 
             L_nia.append(nia)
             L_k.append(k)
+            
             #  MIP
             if os.path.exists(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)):
                 mip_df = pd.read_csv(os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename),index_col=None, header=0)
@@ -203,8 +204,8 @@ def all_instances_obj(data_root, results_folder,processed_folder):
                     # L_mip_status.append("null")
 
             # Greedy
-            if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k))):
-                greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s.csv" % (nia,k,k,k)),index_col=None, header=0)
+            if os.path.exists(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s,%s.csv" % (nia,k,k,k,k))):
+                greedy_df = pd.read_csv(os.path.join(results_folder, "summary", "GreedyMultipleDepth_False_0", "NIA_%s_%s,%s,%s,%s.csv" % (nia,k,k,k,k)),index_col=None, header=0)
                 L_greedy_obj.append(greedy_df["obj"].values[0])
             else:
                 L_greedy_obj.append(None)
@@ -1041,10 +1042,11 @@ def hist_distances(data_root, results_folder, plot_folder):
         mip_path = os.path.join(results_folder, "sol", "OptMultipleDepth_False_0", filename)
         greedy_path = os.path.join(results_folder, "sol", "GreedyMultipleDepth_False_0", filename)
 
-        if use == 'mip' and os.path.exists(mip_path):
-            return pd.read_csv(mip_path), filename, "MIP"
+        #if use == 'mip' and os.path.exists(mip_path):
+        #    return pd.read_csv(mip_path), filename, "MIP"
 
-        elif os.path.exists(greedy_path):
+        #el
+        if os.path.exists(greedy_path):
             return pd.read_csv(greedy_path), filename, "Greedy"
 
         else:
@@ -1156,8 +1158,9 @@ def hist_distances(data_root, results_folder, plot_folder):
     L_all_before = [time_grocery_before, time_res_1_before, time_res_2_before, time_school_before, time_healthcare_before]
     L_all_after = [[time_grocery_after[k] for k in all_k], [time_res_1_after[k] for k in all_k], [time_res_2_after[k] for k in all_k], [time_school_after[k] for k in all_k], [time_healthcare_after[k] for k in all_k]]
     # MIP Filename: L_all_save_names = ["nearest grocery_MILP.png","nearest 1 res_MILP.png","nearest 2 res_MILP.png","nearest school_MILP.png","nearest heathcare_MILP.png"]
-    # Greedy Filename: L_all_save_names = ["nearest grocery_greedy.png","nearest 1 res_greedy.png","nearest 2 res_greedy.png","nearest school_greedy.png","nearest heathcare_greedy.png"]
-    L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png","nearest heathcare.png"]
+    # Greedy Filename: 
+    L_all_save_names = ["nearest grocery_greedy.png","nearest 1 res_greedy.png","nearest 2 res_greedy.png","nearest school_greedy.png","nearest heathcare_greedy.png"]
+    #L_all_save_names = ["nearest grocery.png","nearest 1 res.png","nearest 2 res.png","nearest school.png","nearest heathcare.png"]
     L_all_type_names = ["grocery", "res1", "res2", "school", "healthcare"]
 
 
@@ -1191,7 +1194,7 @@ def hist_distances(data_root, results_folder, plot_folder):
             plt.axvline(np.quantile(arr_after, 0.75), color=colors_line[ind2 + 1], linestyle='dashdot', linewidth=1.5, label='75% (k={}): {:.2f}'.format(all_k[ind2],np.quantile(arr_after, 0.75)))
             plt.axvline(np.max(arr_after), color=colors_line[ind2 + 1], linestyle=('dotted'), linewidth=1.5, label='Max (k={}): {:.2f}'.format(all_k[ind2], np.max(arr_after)))
             #plt.text(np.quantile(arr_after, 0.75) * 1.1, max_ylim * 0.9, '75%: {:.2f}'.format(np.quantile(arr_after, 0.75)))
-        plt.legend(loc='upper right')
+        plt.legend(loc='upper right', fontsize=16)
         plt.xlabel("Walking Time (Minutes)")
         #plt.ylabel("Frequency")
 
@@ -1709,4 +1712,5 @@ if __name__ == "__main__":
     #all_instances_obj(data_root, results_folder,processed_folder)
     #network_charac(data_root, results_folder,processed_folder)
     #quality_table(results_folder, processed_folder)
+    
     #plot_walkability_comparison(data_root, plot_folder, results_folder)

@@ -1,0 +1,2 @@
+nia_id,nia_name,k_grocery,k_restaurant,k_school,k_healthcare,obj,dist_obj_grocery,dist_obj_restaurant,dist_obj_school,dist_obj_healthcare,solving_time,num_res,num_parking,num_cur_grocery,num_cur_restaurant,num_cur_school,num_cur_healthcare,model_status
+5,Elms-Old Rexdale,1,1,1,1,72.3729064773808,425.121530188273,"[562.8862518174839, 1068.4058151673157, 1095.76117823523, 1126.9712298815493, 1582.3684647490827, 2000.0, 2000.0, 2000.0, 2000.0, 2000.0]",382.6638019712388,576.718279903108,0.46726322174072266,156,32,5,4,6,2,
